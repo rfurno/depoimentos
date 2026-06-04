@@ -1,6 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
+// Force dynamic — this route performs auth actions and shouldn't be prerendered.
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   const supabase = await createClient()
 

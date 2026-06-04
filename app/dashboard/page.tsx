@@ -5,6 +5,11 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Plus, Image as ImageIcon } from "lucide-react";
 import type { Profile } from "@/lib/types";
 
+// This page requires authentication and Supabase at request time.
+// Force dynamic rendering so Next.js doesn't try to prerender it at build
+// time when env vars may not be present.
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   const supabase = await createClient();
 

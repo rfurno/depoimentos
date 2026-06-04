@@ -386,8 +386,8 @@ create policy "Authenticated can delete objects (enforce via photos RLS + server
 Copie `.env.example` → `.env.local` e preencha:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...
+NEXT_PUBLIC_SUPABASE_URL=https://wqkcmdujshzgzzazjkuh.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_Us9pH4RRE_WhKJHx2NZiKQ_W0tBwqaM
 NEXT_PUBLIC_APP_URL=https://your-production-domain.com   # Importante para links mágicos
 ```
 
@@ -404,6 +404,9 @@ npm run dev
 ```
 
 Abra http://localhost:3000
+
+**Primeira vez / sem configurar Supabase ainda?**  
+A página inicial (landing) e a tela de login continuam funcionando mesmo sem as variáveis de ambiente. Você verá instruções claras na tela de login. Só após configurar o Supabase as funções de autenticação e páginas protegidas (/dashboard etc.) passarão a funcionar.
 
 1. Clique em "Começar" → insira qualquer e-mail (mesmo fictício para testes, ou use o seu real).
 2. Verifique o Supabase Auth → Logs ou a caixa de entrada (se provedor de email real configurado).
@@ -482,7 +485,9 @@ Vercel + Supabase é uma excelente combinação — edge functions, imagens ráp
 ## Próximos Passos (para a IA / você)
 
 Responda com confirmação de que:
-- `npm run dev` funciona
+- `npm run dev` funciona e a landing page aparece
+- Você consegue ver a tela de login (mesmo sem configurar o Supabase ainda — ela mostra instruções)
+- Após configurar .env.local + rodar o SQL do schema + reiniciar, o fluxo de link mágico funciona
 - Você consegue se cadastrar / entrar via link mágico (verifique Supabase dashboard → Authentication → Users)
 - A tabela profiles recebe uma linha automaticamente
 - Então continuaremos com **Fase 2: CRUD de Projetos + painel**

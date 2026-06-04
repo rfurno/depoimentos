@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Heart, ArrowLeft, Mail, Loader2, CheckCircle } from "lucide-react";
+import { ArrowLeft, Mail, Loader2, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -29,6 +29,7 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") || "/dashboard";
   const errorParam = searchParams.get("error");
+  const isConfigError = errorParam === 'supabase_not_configured';
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -41,7 +42,12 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
+      let supabase;
+      try {
+        supabase = createClient();
+      } catch {
+        throw new Error("Configuração do Supabase ausente. Copie .env.example para .env.local, preencha as chaves e reinicie o servidor.");
+      }
 
       // Use canonical app URL from env when set (recommended for production + Supabase dashboard config).
       // Falls back to current origin for local/dev. Always configure the exact URL(s) in Supabase Auth settings.
@@ -73,6 +79,39 @@ export function LoginForm() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  if (isConfigError) {
+    return (
+      <Card className="border-[#b85c38] shadow-sm bg-[#fdf2ef]">
+        <CardHeader className="text-center pb-4">
+          <CardTitle className="text-2xl tracking-tight text-[#b85c38]">Configuração necessária</CardTitle>
+          <CardDescription className="text-base pt-2 text-[#6b6057]">
+            O Storyloom precisa de um projeto Supabase para funcionar.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4 text-sm text-[#2c2522]">
+          <ol className="list-decimal pl-5 space-y-2">
+            <li>Copie o arquivo <code className="bg-white px-1 rounded">.env.example</code> para <code className="bg-white px-1 rounded">.env.local</code></li>
+            <li>Crie um projeto gratuito em <a href="https://supabase.com" target="_blank" className="underline text-[#8b5e3c]">supabase.com</a></li>
+            <li>Copie a <strong>Project URL</strong> e a <strong>anon public key</strong> do seu projeto (em Settings → API)</li>
+            <li>Cole os valores em <code className="bg-white px-1 rounded">.env.local</code></li>
+            <li>Execute o SQL do schema que está no <code className="bg-white px-1 rounded">README.md</code></li>
+            <li>Reinicie o servidor de desenvolvimento (<code className="bg-white px-1 rounded">npm run dev</code>)</li>
+          </ol>
+          <p className="pt-2 text-xs text-[#6b6057]">
+            Depois de configurar, volte aqui e tente entrar com seu e-mail.
+          </p>
+          <div className="pt-4">
+            <Link href="/">
+              <Button variant="outline" className="w-full">
+                <ArrowLeft className="mr-2 h-4 w-4" /> Voltar à página inicial
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   if (emailSent) {

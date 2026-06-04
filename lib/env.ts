@@ -5,24 +5,49 @@
  *
  * Never put secrets in client bundles — only NEXT_PUBLIC_* here.
  */
-export function validateEnv() {
-  const required = [
-    'NEXT_PUBLIC_SUPABASE_URL',
-    'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-  ] as const
 
-  const missing = required.filter((key) => !process.env[key])
+const REQUIRED_SUPABASE = [
+  'NEXT_PUBLIC_SUPABASE_URL',
+  'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+] as const
+
+export function getSupabaseConfig() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  const isBuild = process.env.NEXT_PHASE === 'phase-production-build' || process.env.CI === 'true'
+
+  if (!url || !anonKey) {
+    if (isBuild) {
+      // During build we return placeholders so pages marked force-dynamic don't crash the build.
+      // Real values are required at runtime.
+      return {
+        url: 'https://placeholder.supabase.co',
+        anonKey: 'placeholder-anon-key-for-build',
+      }
+    }
+
+    const msg =
+      "Your project's URL and Key are required to create a Supabase client!\n\n" +
+      "Copy .env.example to .env.local and fill in your Supabase project's API settings.\n" +
+      "Find them here: https://supabase.com/dashboard/project/_/settings/api\n\n" +
+      "After updating .env.local, restart the dev server."
+    throw new Error(msg)
+  }
+
+  return { url, anonKey }
+}
+
+export function validateEnv() {
+  const missing = REQUIRED_SUPABASE.filter((key) => !process.env[key])
 
   if (missing.length > 0) {
     const msg = `Missing required environment variables: ${missing.join(', ')}. ` +
-      `Copy .env.example to .env.local and fill the values.`
-    // Never throw during `next build` (CI/build servers often don't have runtime secrets yet).
-    // Fail loudly only at actual server runtime (when the app starts serving requests).
+      `Copy .env.example to .env.local and fill the values. ` +
+      `Find your values at https://supabase.com/dashboard/project/_/settings/api`
     const isBuild = process.env.NEXT_PHASE === 'phase-production-build' || process.env.CI === 'true'
     if (!isBuild && process.env.NODE_ENV === 'production') {
-      // In a real production server start (e.g. after deploy), we can be stricter.
       console.error('🚨 ' + msg)
-      // Optionally: process.exit(1) in a custom server, but for Vercel/Next standard hosting we just log.
     } else if (!isBuild) {
       console.error('\n' + '🚨 '.repeat(3) + msg + '\n')
     }
