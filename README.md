@@ -200,90 +200,64 @@ create policy "Users can update own profile"
   on public.profiles for update
   using (auth.uid() = id);
 
--- PROJECTS
+-- PROJECTS + COLLABORATORS (helpers avoid RLS infinite recursion between tables)
+create or replace function public.is_project_owner(project_uuid uuid)
+returns boolean language sql security definer set search_path = public stable as $$
+  select exists (select 1 from public.projects where id = project_uuid and owner_id = (select auth.uid()));
+$$;
+create or replace function public.is_project_collaborator(project_uuid uuid)
+returns boolean language sql security definer set search_path = public stable as $$
+  select exists (select 1 from public.project_collaborators where project_id = project_uuid and user_id = (select auth.uid()));
+$$;
+create or replace function public.is_project_member(project_uuid uuid)
+returns boolean language sql security definer set search_path = public stable as $$
+  select public.is_project_owner(project_uuid) or public.is_project_collaborator(project_uuid);
+$$;
+create or replace function public.can_contribute_to_project(project_uuid uuid)
+returns boolean language sql security definer set search_path = public stable as $$
+  select public.is_project_owner(project_uuid) or exists (
+    select 1 from public.project_collaborators
+    where project_id = project_uuid and user_id = (select auth.uid()) and role in ('contributor', 'admin')
+  );
+$$;
+grant execute on function public.is_project_owner(uuid) to authenticated;
+grant execute on function public.is_project_collaborator(uuid) to authenticated;
+grant execute on function public.is_project_member(uuid) to authenticated;
+grant execute on function public.can_contribute_to_project(uuid) to authenticated;
+
 alter table public.projects enable row level security;
 
-create policy "Owners can do everything on their projects"
-  on public.projects for all
-  using (auth.uid() = owner_id)
-  with check (auth.uid() = owner_id);
+create policy "projects_insert_owner" on public.projects for insert to authenticated
+  with check ((select auth.uid()) = owner_id);
+create policy "projects_select_owner" on public.projects for select to authenticated
+  using ((select auth.uid()) = owner_id);
+create policy "projects_update_owner" on public.projects for update to authenticated
+  using ((select auth.uid()) = owner_id) with check ((select auth.uid()) = owner_id);
+create policy "projects_delete_owner" on public.projects for delete to authenticated
+  using ((select auth.uid()) = owner_id);
+create policy "projects_select_collaborator" on public.projects for select to authenticated
+  using (public.is_project_collaborator(id));
 
-create policy "Collaborators can view projects they belong to"
-  on public.projects for select
-  using (
-    exists (
-      select 1 from public.project_collaborators
-      where project_id = projects.id and user_id = auth.uid()
-    )
-  );
-
--- PROJECT_COLLABORATORS
 alter table public.project_collaborators enable row level security;
 
-create policy "Owners manage collaborators"
-  on public.project_collaborators for all
-  using (
-    exists (select 1 from public.projects where id = project_id and owner_id = auth.uid())
-  )
-  with check (
-    exists (select 1 from public.projects where id = project_id and owner_id = auth.uid())
-  );
+create policy "collaborators_owner_manage" on public.project_collaborators for all to authenticated
+  using (public.is_project_owner(project_id)) with check (public.is_project_owner(project_id));
+create policy "collaborators_select_member" on public.project_collaborators for select to authenticated
+  using (public.is_project_collaborator(project_id));
 
-create policy "Collaborators can view other collaborators in same project"
-  on public.project_collaborators for select
-  using (
-    exists (
-      select 1 from public.project_collaborators c2
-      where c2.project_id = project_collaborators.project_id and c2.user_id = auth.uid()
-    )
-    or exists (select 1 from public.projects p where p.id = project_id and p.owner_id = auth.uid())
-  );
-
--- PHOTOS
+-- PHOTOS (uses is_project_* helpers above — no cross-table policy recursion)
 alter table public.photos enable row level security;
 
-create policy "View approved photos if collaborator or owner"
-  on public.photos for select
-  using (
-    is_approved = true and (
-      exists (select 1 from public.projects where id = project_id and owner_id = auth.uid())
-      or exists (
-        select 1 from public.project_collaborators
-        where project_id = photos.project_id and user_id = auth.uid()
-      )
-    )
-  );
-
-create policy "Owners can view all photos (incl unapproved)"
-  on public.photos for select
-  using (
-    exists (select 1 from public.projects where id = project_id and owner_id = auth.uid())
-  );
-
-create policy "Contributors and owners can insert photos"
-  on public.photos for insert
-  with check (
-    auth.uid() = uploaded_by and (
-      exists (select 1 from public.projects where id = project_id and owner_id = auth.uid())
-      or exists (
-        select 1 from public.project_collaborators
-        where project_id = photos.project_id and user_id = auth.uid() and role in ('contributor', 'admin')
-      )
-    )
-  );
-
-create policy "Owners + uploader can update their photos"
-  on public.photos for update
-  using (
-    auth.uid() = uploaded_by or
-    exists (select 1 from public.projects where id = project_id and owner_id = auth.uid())
-  );
-
-create policy "Owners can delete photos"
-  on public.photos for delete
-  using (
-    exists (select 1 from public.projects where id = project_id and owner_id = auth.uid())
-  );
+create policy "photos_select_approved_member" on public.photos for select to authenticated
+  using (is_approved = true and public.is_project_member(project_id));
+create policy "photos_select_owner_all" on public.photos for select to authenticated
+  using (public.is_project_owner(project_id));
+create policy "photos_insert_contributor" on public.photos for insert to authenticated
+  with check ((select auth.uid()) = uploaded_by and public.can_contribute_to_project(project_id));
+create policy "photos_update_owner_or_uploader" on public.photos for update to authenticated
+  using (public.is_project_owner(project_id) or (select auth.uid()) = uploaded_by);
+create policy "photos_delete_owner" on public.photos for delete to authenticated
+  using (public.is_project_owner(project_id));
 
 -- COMMENTS
 alter table public.comments enable row level security;
@@ -377,6 +351,7 @@ create policy "Authenticated can delete objects (enforce via photos RLS + server
 ```
 
 **Após executar o SQL:**
+- Se a criação de projetos falhar com erro de RLS/recursão, execute também `supabase/fix-rls-recursion.sql` no SQL Editor (corrige políticas antigas já aplicadas).
 - Vá em Storage → verifique que o bucket `photos` foi criado como **private** (não público). Se o insert não rodou, crie manualmente como private.
 - **Nunca** use URLs públicas diretas do storage (`/object/public/photos/...`) para fotos de família. Sempre gere signed URLs no servidor para usuários autorizados (veja comentários no SQL acima e implemente em server actions/components na Fase 3+).
 - As RLS + policies acima são abrangentes.

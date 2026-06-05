@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { projectMutationError } from '@/lib/supabase/errors'
 import { getProjectAccess } from '@/lib/projects/queries'
 import { parseUuid } from '@/lib/validation/uuid'
 import { revalidatePath } from 'next/cache'
@@ -66,7 +67,7 @@ export async function createProject(
     .single()
 
   if (error) {
-    return { error: 'Não foi possível criar o projeto. Tente novamente.' }
+    return { error: projectMutationError('createProject', error) }
   }
 
   revalidatePath('/dashboard')
@@ -112,7 +113,7 @@ export async function updateProject(
     .eq('id', id)
 
   if (error) {
-    return { error: 'Não foi possível atualizar o projeto.' }
+    return { error: projectMutationError('updateProject', error) }
   }
 
   revalidatePath('/dashboard')
@@ -143,7 +144,7 @@ export async function deleteProject(projectId: string): Promise<ProjectActionSta
   const { error } = await supabase.from('projects').delete().eq('id', id)
 
   if (error) {
-    return { error: 'Não foi possível excluir o projeto.' }
+    return { error: projectMutationError('deleteProject', error) }
   }
 
   revalidatePath('/dashboard')
