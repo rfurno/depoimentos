@@ -154,6 +154,45 @@ export interface Database {
         }
         Relationships: []
       }
+      project_invites: {
+        Row: {
+          id: string
+          project_id: string
+          token: string
+          email: string | null
+          role: string
+          expires_at: string
+          redeemed_at: string | null
+          redeemed_by: string | null
+          created_by: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          token?: string
+          email?: string | null
+          role: string
+          expires_at: string
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          created_by: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          token?: string
+          email?: string | null
+          role?: string
+          expires_at?: string
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          created_by?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: { [key: string]: never }
     Functions: { [key: string]: never }

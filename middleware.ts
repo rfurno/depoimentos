@@ -78,10 +78,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // If user is logged in and trying to access auth pages, redirect to dashboard
+  // If user is logged in and trying to access auth pages, honor redirectTo when safe
   if (user && isAuthPage) {
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    url.pathname = sanitizeRedirectPath(request.nextUrl.searchParams.get('redirectTo'))
+    url.search = ''
     return NextResponse.redirect(url)
   }
 

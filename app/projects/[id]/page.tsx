@@ -6,6 +6,7 @@ import { ArrowLeft, Pencil } from 'lucide-react'
 import { AppShell } from '@/components/layout/app-shell'
 import { PhotoGallery } from '@/components/photos/photo-gallery'
 import { PhotoUploadPanel } from '@/components/photos/photo-upload-panel'
+import { ProjectInvitesPanel } from '@/components/invites/project-invites-panel'
 import { DeleteProjectButton } from '@/components/projects/delete-project-button'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
@@ -13,7 +14,9 @@ import { requireUser } from '@/lib/auth/server'
 import { getGalleryPhotos } from '@/lib/photos/queries'
 import { canUploadPhotos } from '@/lib/photos/permissions'
 import { roleLabel } from '@/lib/projects/labels'
+import { listProjectInvites } from '@/lib/invites/queries'
 import { getDisplayName, getProjectAccess } from '@/lib/projects/queries'
+import { headers } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,7 +37,15 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   }
 
   const { project, role, isOwner } = access
-  const photos = await getGalleryPhotos(project.id, { includeUnapproved: isOwner })
+  const h = await headers()
+  const host = h.get('x-forwarded-host') ?? h.get('host')
+  const proto = h.get('x-forwarded-proto') ?? 'http'
+  const origin = host ? `${proto}://${host}` : undefined
+
+  const [photos, invites] = await Promise.all([
+    getGalleryPhotos(project.id, { includeUnapproved: isOwner }),
+    isOwner ? listProjectInvites(project.id, user.id, origin) : Promise.resolve([]),
+  ])
   const showUpload = canUploadPhotos(role)
   const hasServiceKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)
 
@@ -94,6 +105,14 @@ export default async function ProjectDetailPage({ params }: PageProps) {
         )}
 
         <section className="mt-10 space-y-8">
+          {isOwner && (
+            <ProjectInvitesPanel
+              projectId={project.id}
+              invites={invites}
+              hasServiceKey={hasServiceKey}
+            />
+          )}
+
           {showUpload && (
             <PhotoUploadPanel projectId={project.id} />
           )}
