@@ -10,6 +10,7 @@ import type { Role } from '@/lib/types'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { DeletePhotoButton } from '@/components/photos/delete-photo-button'
+import { PhotoDetailModal } from '@/components/photos/photo-detail-modal'
 
 type PhotoGalleryProps = {
   projectId: string
@@ -17,6 +18,7 @@ type PhotoGalleryProps = {
   role: Role
   isOwner: boolean
   currentUserId: string
+  currentUserDisplayName: string
 }
 
 function matchesSearch(photo: GalleryPhoto, query: string): boolean {
@@ -32,8 +34,10 @@ export function PhotoGallery({
   role,
   isOwner,
   currentUserId,
+  currentUserDisplayName,
 }: PhotoGalleryProps) {
   const [search, setSearch] = useState('')
+  const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null)
 
   const filtered = useMemo(
     () => photos.filter((p) => matchesSearch(p, search)),
@@ -48,12 +52,15 @@ export function PhotoGallery({
         </div>
         <h2 className="text-xl font-semibold tracking-tight mb-2">Nenhuma foto ainda</h2>
         <p className="text-[#6b6057] max-w-md mx-auto text-sm">
-          Adicione a primeira memória usando o painel acima. Legendas e histórias podem ser
-          enriquecidas na Fase 4 (comentários e detalhes).
+          Adicione a primeira memória usando o painel acima. Toque em qualquer foto para ver
+          detalhes e comentários da família.
         </p>
       </div>
     )
   }
+
+  const selectedPhoto =
+    selectedPhotoId != null ? photos.find((p) => p.id === selectedPhotoId) ?? null : null
 
   return (
     <div className="space-y-4">
@@ -83,7 +90,17 @@ export function PhotoGallery({
             return (
               <article
                 key={photo.id}
-                className="group relative rounded-xl overflow-hidden border border-[#d9d0c3] bg-[#e8e0d5] aspect-square"
+                role="button"
+                tabIndex={0}
+                className="group relative rounded-xl overflow-hidden border border-[#d9d0c3] bg-[#e8e0d5] aspect-square cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5e3c] focus-visible:ring-offset-2"
+                onClick={() => setSelectedPhotoId(photo.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    setSelectedPhotoId(photo.id)
+                  }
+                }}
+                aria-label={`Abrir detalhes: ${photo.title || photo.caption || 'foto'}`}
               >
                 {photo.signedUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element -- signed URLs expire; not compatible with next/image cache
@@ -121,7 +138,11 @@ export function PhotoGallery({
                 </div>
 
                 {showDelete && (
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition">
+                  <div
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition"
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.stopPropagation()}
+                  >
                     <DeletePhotoButton projectId={projectId} photoId={photo.id} />
                   </div>
                 )}
@@ -134,7 +155,22 @@ export function PhotoGallery({
       <p className="text-xs text-[#6b6057] text-center">
         {filtered.length} de {photos.length} foto{photos.length !== 1 ? 's' : ''}
         {search.trim() ? ' (filtradas)' : ''}
+        {' · '}
+        Toque em uma foto para ver detalhes e comentários
       </p>
+
+      <PhotoDetailModal
+        key={selectedPhotoId ?? 'closed'}
+        photo={selectedPhoto}
+        open={selectedPhoto != null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedPhotoId(null)
+        }}
+        projectId={projectId}
+        currentUserId={currentUserId}
+        currentUserDisplayName={currentUserDisplayName}
+        isOwner={isOwner}
+      />
     </div>
   )
 }

@@ -106,6 +106,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               role={role}
               isOwner={isOwner}
               currentUserId={user.id}
+              currentUserDisplayName={displayName}
             />
           </div>
         </section>
