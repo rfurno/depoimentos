@@ -1,33 +1,44 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { getSupabaseConfig } from '@/lib/env'
+import { sanitizeRedirectPath } from '@/lib/auth/safe-redirect'
+import type { Database } from '@/lib/types'
 
-// Force dynamic — this route performs auth code exchange.
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
-export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
-  const redirectTo = searchParams.get('redirectTo') || '/dashboard'
+  const redirectTo = sanitizeRedirectPath(searchParams.get('redirectTo'))
+  const origin = request.nextUrl.origin
 
-  if (code) {
-    const supabase = await createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) {
-      // Successful sign in - redirect, preserving any intended path.
-      // SECURITY: Strictly validate redirectTo to prevent open redirect attacks
-      // (e.g. //evil.com protocol-relative redirects).
-      let safeRedirect = '/dashboard'
-      if (redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {
-        // Additional safety: no protocol or host in path, no javascript: etc.
-        const firstSegment = redirectTo.split('?')[0].split('#')[0]
-        if (!firstSegment.includes(':') && !firstSegment.includes('@')) {
-          safeRedirect = redirectTo
-        }
-      }
-      return NextResponse.redirect(`${origin}${safeRedirect}`)
-    }
+  if (!code) {
+    return NextResponse.redirect(`${origin}/login?error=auth_failed`)
   }
 
-  // Return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/login?error=auth_failed`)
+  const { url, anonKey } = getSupabaseConfig()
+  const cookieStore = await cookies()
+  const redirectResponse = NextResponse.redirect(`${origin}${redirectTo}`)
+
+  const supabase = createServerClient<Database>(url, anonKey, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll()
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          redirectResponse.cookies.set(name, value, options)
+        })
+      },
+    },
+  })
+
+  const { error } = await supabase.auth.exchangeCodeForSession(code)
+  if (error) {
+    return NextResponse.redirect(`${origin}/login?error=auth_failed`)
+  }
+
+  return redirectResponse
 }

@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Mail, Loader2, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { sanitizeRedirectPath } from "@/lib/auth/safe-redirect";
 
 const loginSchema = z.object({
   email: z.string().email("Por favor, insira um endereço de e-mail válido"),
@@ -27,7 +28,7 @@ export function LoginForm() {
   const [sentTo, setSentTo] = useState("");
 
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/dashboard";
+  const redirectTo = sanitizeRedirectPath(searchParams.get("redirectTo"));
   const errorParam = searchParams.get("error");
   const isConfigError = errorParam === 'supabase_not_configured';
 

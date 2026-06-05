@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { sanitizeRedirectPath } from '@/lib/auth/safe-redirect'
 import { getSupabaseConfig, validateEnv } from '@/lib/env'
 
 // Run validation for console warnings on every request in dev
@@ -73,7 +74,7 @@ export async function middleware(request: NextRequest) {
     // no user, potentially respond by redirecting to login
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    url.searchParams.set('redirectTo', request.nextUrl.pathname)
+    url.searchParams.set('redirectTo', sanitizeRedirectPath(request.nextUrl.pathname))
     return NextResponse.redirect(url)
   }
 

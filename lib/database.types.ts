@@ -40,8 +40,57 @@ export interface Database {
         }
         Relationships: []
       }
-      // Add other tables as needed after generation. For now use the manual interfaces in lib/types.ts
-      [key: string]: unknown
+      projects: {
+        Row: {
+          id: string
+          owner_id: string
+          title: string
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          owner_id: string
+          title: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          owner_id?: string
+          title?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      project_collaborators: {
+        Row: {
+          id: string
+          project_id: string
+          user_id: string
+          role: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          user_id: string
+          role: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          user_id?: string
+          role?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: { [key: string]: never }
     Functions: { [key: string]: never }
