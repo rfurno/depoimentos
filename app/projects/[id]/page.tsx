@@ -2,12 +2,16 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { ArrowLeft, Pencil, Images } from 'lucide-react'
+import { ArrowLeft, Pencil } from 'lucide-react'
 import { AppShell } from '@/components/layout/app-shell'
+import { PhotoGallery } from '@/components/photos/photo-gallery'
+import { PhotoUploadPanel } from '@/components/photos/photo-upload-panel'
 import { DeleteProjectButton } from '@/components/projects/delete-project-button'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { requireUser } from '@/lib/auth/server'
+import { getGalleryPhotos } from '@/lib/photos/queries'
+import { canUploadPhotos } from '@/lib/photos/permissions'
 import { roleLabel } from '@/lib/projects/labels'
 import { getDisplayName, getProjectAccess } from '@/lib/projects/queries'
 
@@ -30,6 +34,10 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   }
 
   const { project, role, isOwner } = access
+  const photos = await getGalleryPhotos(project.id, { includeUnapproved: isOwner })
+  const showUpload = canUploadPhotos(role)
+  const hasServiceKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)
+
   const createdLabel = format(new Date(project.created_at), "d 'de' MMMM 'de' yyyy", {
     locale: ptBR,
   })
@@ -77,15 +85,29 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           )}
         </div>
 
-        <section className="mt-12 rounded-2xl border border-[#d9d0c3] bg-white p-12 text-center">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f0e9df]">
-            <Images className="h-7 w-7 text-[#8b5e3c]" />
-          </div>
-          <h2 className="text-xl font-semibold tracking-tight mb-2">Galeria de fotos</h2>
-          <p className="text-[#6b6057] max-w-md mx-auto text-sm">
-            Upload de fotos, legendas e comentários chegam na <strong>Fase 3</strong>. Este
-            projeto já está salvo e pronto para receber memórias.
+        {!hasServiceKey && photos.length > 0 && photos.every((p) => !p.signedUrl) && (
+          <p className="mt-6 text-sm text-[#b85c38] rounded-lg bg-[#fdf2ef] px-4 py-3 border border-[#b85c38]/20">
+            Configure <code className="text-xs bg-white px-1 rounded">SUPABASE_SERVICE_ROLE_KEY</code>{' '}
+            em <code className="text-xs bg-white px-1 rounded">.env.local</code> para exibir imagens do
+            bucket privado (recomendado).
           </p>
+        )}
+
+        <section className="mt-10 space-y-8">
+          {showUpload && (
+            <PhotoUploadPanel projectId={project.id} />
+          )}
+
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight mb-4">Galeria</h2>
+            <PhotoGallery
+              projectId={project.id}
+              photos={photos}
+              role={role}
+              isOwner={isOwner}
+              currentUserId={user.id}
+            />
+          </div>
         </section>
       </main>
     </AppShell>

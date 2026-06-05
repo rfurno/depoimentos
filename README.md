@@ -328,30 +328,21 @@ on conflict (id) do nothing;
 -- Then pass the signed URL (not the raw path) to <img src={signedUrl} /> etc.
 -- This way only people who passed RLS for the photo row can see the image.
 
--- Upload policy: only authenticated users (further restricted in app logic + RLS on photos table)
-create policy "Authenticated users can upload photos"
-  on storage.objects for insert
-  with check (
-    bucket_id = 'photos'
-    and auth.role() = 'authenticated'
-    -- You can add stricter folder checks here, e.g. starts with project id the user belongs to.
-    -- We also enforce via the photos table RLS on insert (uploaded_by + membership).
-  );
-
--- Update/delete: owners of the *photo record* should control this. We keep loose here and enforce in app.
-create policy "Authenticated can update/delete own uploaded objects (enforce in app)"
-  on storage.objects for update using (
-    bucket_id = 'photos' and auth.role() = 'authenticated'
-  );
-
-create policy "Authenticated can delete objects (enforce via photos RLS + server actions)"
-  on storage.objects for delete using (
-    bucket_id = 'photos' and auth.role() = 'authenticated'
-  );
+-- Storage RLS (photos bucket) — use supabase/storage-policies.sql or the split files below.
+-- Requires fix-rls-recursion.sql first (is_project_owner / is_project_member helpers).
+--
+-- INSERT: project members → folder {project_id}/...
+-- SELECT: project members (optional if using service-role signed URLs only)
+-- UPDATE: original uploader only (upsert)
+-- DELETE: project owner OR original uploader (owner_id on storage.objects)
+--
+-- See: supabase/storage-policies.sql (all-in-one)
+--   or storage-upload-policy.sql, storage-read-policy.sql, storage-delete-policy.sql
 ```
 
 **Após executar o SQL:**
 - Se a criação de projetos falhar com erro de RLS/recursão, execute também `supabase/fix-rls-recursion.sql` no SQL Editor (corrige políticas antigas já aplicadas).
+- Para storage do bucket `photos`, execute `supabase/storage-policies.sql` (recomendado) ou os arquivos `storage-upload-policy.sql`, `storage-read-policy.sql` e `storage-delete-policy.sql`.
 - Vá em Storage → verifique que o bucket `photos` foi criado como **private** (não público). Se o insert não rodou, crie manualmente como private.
 - **Nunca** use URLs públicas diretas do storage (`/object/public/photos/...`) para fotos de família. Sempre gere signed URLs no servidor para usuários autorizados (veja comentários no SQL acima e implemente em server actions/components na Fase 3+).
 - As RLS + policies acima são abrangentes.

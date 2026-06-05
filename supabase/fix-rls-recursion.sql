@@ -1,6 +1,6 @@
 -- ============================================
 -- FIX: infinite recursion in RLS (projects ↔ project_collaborators)
--- Run once in Supabase Dashboard → SQL Editor
+-- Safe to re-run: drops old + new policy names before CREATE.
 -- Error symptom: "infinite recursion detected in policy for relation projects"
 -- ============================================
 
@@ -66,6 +66,11 @@ grant execute on function public.can_contribute_to_project(uuid) to authenticate
 -- ---- PROJECTS ----
 drop policy if exists "Owners can do everything on their projects" on public.projects;
 drop policy if exists "Collaborators can view projects they belong to" on public.projects;
+drop policy if exists "projects_insert_owner" on public.projects;
+drop policy if exists "projects_select_owner" on public.projects;
+drop policy if exists "projects_update_owner" on public.projects;
+drop policy if exists "projects_delete_owner" on public.projects;
+drop policy if exists "projects_select_collaborator" on public.projects;
 
 create policy "projects_insert_owner"
   on public.projects for insert to authenticated
@@ -91,6 +96,8 @@ create policy "projects_select_collaborator"
 -- ---- PROJECT_COLLABORATORS ----
 drop policy if exists "Owners manage collaborators" on public.project_collaborators;
 drop policy if exists "Collaborators can view other collaborators in same project" on public.project_collaborators;
+drop policy if exists "collaborators_owner_manage" on public.project_collaborators;
+drop policy if exists "collaborators_select_member" on public.project_collaborators;
 
 create policy "collaborators_owner_manage"
   on public.project_collaborators for all to authenticated
@@ -107,6 +114,11 @@ drop policy if exists "Owners can view all photos (incl unapproved)" on public.p
 drop policy if exists "Contributors and owners can insert photos" on public.photos;
 drop policy if exists "Owners + uploader can update their photos" on public.photos;
 drop policy if exists "Owners can delete photos" on public.photos;
+drop policy if exists "photos_select_approved_member" on public.photos;
+drop policy if exists "photos_select_owner_all" on public.photos;
+drop policy if exists "photos_insert_contributor" on public.photos;
+drop policy if exists "photos_update_owner_or_uploader" on public.photos;
+drop policy if exists "photos_delete_owner" on public.photos;
 
 create policy "photos_select_approved_member"
   on public.photos for select to authenticated

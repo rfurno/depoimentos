@@ -91,6 +91,69 @@ export interface Database {
         }
         Relationships: []
       }
+      photos: {
+        Row: {
+          id: string
+          project_id: string
+          uploaded_by: string
+          title: string | null
+          caption: string | null
+          story: string | null
+          image_path: string
+          is_approved: boolean
+          display_order: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          uploaded_by: string
+          title?: string | null
+          caption?: string | null
+          story?: string | null
+          image_path: string
+          is_approved?: boolean
+          display_order?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          uploaded_by?: string
+          title?: string | null
+          caption?: string | null
+          story?: string | null
+          image_path?: string
+          is_approved?: boolean
+          display_order?: number | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      comments: {
+        Row: {
+          id: string
+          photo_id: string
+          user_id: string
+          content: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          photo_id: string
+          user_id: string
+          content: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          photo_id?: string
+          user_id?: string
+          content?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: { [key: string]: never }
     Functions: { [key: string]: never }
