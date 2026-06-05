@@ -420,9 +420,36 @@ Para entregabilidade de email em produção, configure um SMTP customizado ou us
 
 1. Faça push para o GitHub.
 2. Importe o projeto no Vercel.
-3. Adicione as duas variáveis de ambiente `NEXT_PUBLIC_SUPABASE_*` (e quaisquer outras).
+3. Adicione as variáveis de ambiente (`NEXT_PUBLIC_SUPABASE_*`, `NEXT_PUBLIC_APP_URL`, `SUPABASE_SERVICE_ROLE_KEY`, etc.).
 4. (Opcional) Adicione um domínio customizado. O Storyloom funciona muito bem no mobile, então experiência tipo PWA é natural.
 5. Após o deploy, re-execute o schema SQL no seu projeto Supabase de produção (ou conecte um projeto Supabase separado).
+
+### Convites e login em produção (obrigatório)
+
+**1. Desative a proteção Vercel que pede conta Vercel**
+
+Se colaboradores veem “Authenticate” / login em `vercel.com` ao abrir o site ou o link mágico, o app **nem chega a rodar** — é o [Deployment Protection](https://vercel.com/docs/security/deployment-protection) da Vercel.
+
+- Vercel → seu projeto → **Settings** → **Deployment Protection**
+- Em **Production**: desligue **Vercel Authentication** (ou use “Only Preview Deployments” se existir essa opção)
+- Não envie links de **preview** (`*-git-*-*.vercel.app` ou URLs de branch) para família; use só o domínio de **Production**
+
+**2. `NEXT_PUBLIC_APP_URL`**
+
+Defina na Vercel o URL **público de produção** (ex.: `https://seu-app.vercel.app`), redeploy, e gere **novos** links de convite.
+
+**3. Supabase → Authentication → URL Configuration**
+
+- **Site URL**: mesmo valor de `NEXT_PUBLIC_APP_URL`
+- **Redirect URLs** (adicione todas):
+
+  ```
+  https://SEU-DOMINIO/auth/callback
+  https://SEU-DOMINIO/auth/callback/**
+  https://SEU-DOMINIO/invite/*
+  ```
+
+Sem isso, o e-mail do link mágico pode redirecionar para `/?code=...` em vez de `/auth/callback` (o middleware do app corrige isso, mas a Vercel ainda precisa deixar o tráfego passar).
 
 Vercel + Supabase é uma excelente combinação — edge functions, imagens rápidas, etc.
 

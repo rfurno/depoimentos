@@ -9,6 +9,17 @@ if (typeof window === 'undefined') {
 }
 
 export async function middleware(request: NextRequest) {
+  // Supabase sometimes redirects magic links to Site URL root (/?code=...) instead of
+  // /auth/callback. Forward to our handler so the session is established correctly.
+  if (
+    request.nextUrl.pathname === '/' &&
+    request.nextUrl.searchParams.has('code')
+  ) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/auth/callback'
+    return NextResponse.redirect(url)
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })
