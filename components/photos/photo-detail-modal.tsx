@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { Loader2, MessageCircle, Pencil, Trash2 } from 'lucide-react'
+import { Loader2, MessageCircle, Pencil, Play, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   addComment,
@@ -36,6 +36,7 @@ type PhotoDetailModalProps = {
   currentUserId: string
   currentUserDisplayName: string
   isOwner: boolean
+  onOpenSlideshow?: () => void
 }
 
 function CommentItem({
@@ -186,6 +187,7 @@ export function PhotoDetailModal({
   currentUserId,
   currentUserDisplayName,
   isOwner,
+  onOpenSlideshow,
 }: PhotoDetailModalProps) {
   const router = useRouter()
   const [comments, setComments] = useState<CommentWithAuthor[] | null>(null)
@@ -279,12 +281,31 @@ export function PhotoDetailModal({
 
             <div className="p-5 space-y-5">
               <DialogHeader className="text-left gap-1 p-0">
-                <DialogTitle className="text-2xl tracking-tight text-[#2c2522]">
-                  {title}
-                </DialogTitle>
-                <DialogDescription className="text-[#6b6057]">
-                  Adicionada em {createdLabel}
-                </DialogDescription>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <DialogTitle className="text-2xl tracking-tight text-[#2c2522]">
+                      {title}
+                    </DialogTitle>
+                    <DialogDescription className="text-[#6b6057]">
+                      Adicionada em {createdLabel}
+                    </DialogDescription>
+                  </div>
+                  {onOpenSlideshow && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="border-[#d9d0c3] shrink-0"
+                      onClick={() => {
+                        handleOpenChange(false)
+                        onOpenSlideshow()
+                      }}
+                    >
+                      <Play className="mr-2 h-4 w-4" />
+                      Apresentação
+                    </Button>
+                  )}
+                </div>
               </DialogHeader>
 
               {(photo.caption || photo.story) && (

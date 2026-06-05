@@ -3,7 +3,8 @@
 import { useMemo, useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { MessageCircle, Search, Images } from 'lucide-react'
+import { Images, MessageCircle, Play, Search } from 'lucide-react'
+import Link from 'next/link'
 import type { GalleryPhoto } from '@/lib/photos/queries'
 import { canDeletePhoto } from '@/lib/photos/permissions'
 import type { Role } from '@/lib/types'
@@ -11,9 +12,12 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { DeletePhotoButton } from '@/components/photos/delete-photo-button'
 import { PhotoDetailModal } from '@/components/photos/photo-detail-modal'
+import { PhotoSlideshow } from '@/components/photos/photo-slideshow'
+import { Button } from '@/components/ui/button'
 
 type PhotoGalleryProps = {
   projectId: string
+  projectTitle: string
   photos: GalleryPhoto[]
   role: Role
   isOwner: boolean
@@ -30,6 +34,7 @@ function matchesSearch(photo: GalleryPhoto, query: string): boolean {
 
 export function PhotoGallery({
   projectId,
+  projectTitle,
   photos,
   role,
   isOwner,
@@ -38,6 +43,8 @@ export function PhotoGallery({
 }: PhotoGalleryProps) {
   const [search, setSearch] = useState('')
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null)
+  const [slideshowOpen, setSlideshowOpen] = useState(false)
+  const [slideshowStartIndex, setSlideshowStartIndex] = useState(0)
 
   const filtered = useMemo(
     () => photos.filter((p) => matchesSearch(p, search)),
@@ -62,18 +69,52 @@ export function PhotoGallery({
   const selectedPhoto =
     selectedPhotoId != null ? photos.find((p) => p.id === selectedPhotoId) ?? null : null
 
+  function openSlideshow(startPhotoId?: string) {
+    const list = filtered
+    if (list.length === 0) return
+    const idx =
+      startPhotoId != null ? list.findIndex((p) => p.id === startPhotoId) : 0
+    setSlideshowStartIndex(idx >= 0 ? idx : 0)
+    setSlideshowOpen(true)
+    setSelectedPhotoId(null)
+  }
+
   return (
     <div className="space-y-4">
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6b6057]" />
-        <Input
-          type="search"
-          placeholder="Buscar por título, legenda ou história..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 bg-white border-[#d9d0c3] h-11"
-          aria-label="Buscar fotos"
-        />
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6b6057]" />
+          <Input
+            type="search"
+            placeholder="Buscar por título, legenda ou história..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 bg-white border-[#d9d0c3] h-11"
+            aria-label="Buscar fotos"
+          />
+        </div>
+        {filtered.length > 0 && (
+          <div className="flex gap-2 shrink-0">
+            <Button
+              type="button"
+              className="bg-[#8b5e3c] hover:bg-[#6d4a2f] text-white"
+              onClick={() => openSlideshow()}
+            >
+              <Play className="mr-2 h-4 w-4" />
+              Apresentação
+            </Button>
+            <Link
+              href={
+                selectedPhotoId
+                  ? `/projects/${projectId}/slideshow?photo=${selectedPhotoId}`
+                  : `/projects/${projectId}/slideshow`
+              }
+              className="inline-flex h-7 items-center justify-center rounded-[min(var(--radius-md),12px)] border border-[#d9d0c3] bg-background px-2.5 text-[0.8rem] font-medium hover:bg-muted"
+            >
+              Tela cheia
+            </Link>
+          </div>
+        )}
       </div>
 
       {filtered.length === 0 ? (
@@ -156,8 +197,20 @@ export function PhotoGallery({
         {filtered.length} de {photos.length} foto{photos.length !== 1 ? 's' : ''}
         {search.trim() ? ' (filtradas)' : ''}
         {' · '}
-        Toque em uma foto para ver detalhes e comentários
+        Toque em uma foto para detalhes · use Apresentação para modo tela cheia
       </p>
+
+      <PhotoSlideshow
+        key={slideshowOpen ? `slideshow-${slideshowStartIndex}` : 'slideshow-closed'}
+        mode="overlay"
+        open={slideshowOpen}
+        onClose={() => setSlideshowOpen(false)}
+        photos={filtered}
+        initialIndex={slideshowStartIndex}
+        projectId={projectId}
+        projectTitle={projectTitle}
+        currentUserDisplayName={currentUserDisplayName}
+      />
 
       <PhotoDetailModal
         key={selectedPhotoId ?? 'closed'}
@@ -170,6 +223,9 @@ export function PhotoGallery({
         currentUserId={currentUserId}
         currentUserDisplayName={currentUserDisplayName}
         isOwner={isOwner}
+        onOpenSlideshow={
+          selectedPhoto ? () => openSlideshow(selectedPhoto.id) : undefined
+        }
       />
     </div>
   )

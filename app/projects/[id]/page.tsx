@@ -102,6 +102,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             <h2 className="text-2xl font-semibold tracking-tight mb-4">Galeria</h2>
             <PhotoGallery
               projectId={project.id}
+              projectTitle={project.title}
               photos={photos}
               role={role}
               isOwner={isOwner}
