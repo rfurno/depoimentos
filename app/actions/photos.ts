@@ -69,7 +69,19 @@ export async function uploadPhotos(
   const metadata = parseMetadata(formData.get('metadata'))
   const uploadedPaths: string[] = []
   let successCount = 0
-  const baseOrder = Date.now()
+
+  // display_order is integer (max ~2.1e9) — never use Date.now() here
+  const { data: lastOrdered } = await supabase
+    .from('photos')
+    .select('display_order')
+    .eq('project_id', id)
+    .order('display_order', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const last =
+    typeof lastOrdered?.display_order === 'number' ? lastOrdered.display_order : -1
+  let nextDisplayOrder = last >= 0 && last < 2_000_000_000 ? last + 1 : 0
 
   for (let i = 0; i < fileEntries.length; i++) {
     const file = fileEntries[i]
@@ -89,12 +101,23 @@ export async function uploadPhotos(
       })
 
     if (storageError) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[uploadPhotos:storage]', storageError.message)
+      }
       await cleanupStoragePaths(supabase, uploadedPaths)
+      const storageMsg = storageError.message?.toLowerCase() ?? ''
+      if (storageMsg.includes('row-level security') || storageMsg.includes('policy')) {
+        return {
+          error:
+            'Sem permissão no armazenamento. Execute supabase/storage-upload-policy.sql no Supabase.',
+        }
+      }
+      if (storageMsg.includes('bucket') || storageMsg.includes('not found')) {
+        return { error: 'Bucket "photos" não encontrado. Crie-o como privado no Supabase Storage.' }
+      }
       return {
         error:
-          process.env.SUPABASE_SERVICE_ROLE_KEY
-            ? 'Falha ao enviar imagem para o armazenamento.'
-            : 'Falha no armazenamento. Verifique o bucket "photos" e as políticas no Supabase.',
+          'Falha ao enviar imagem para o armazenamento. Verifique o bucket "photos" e as políticas.',
       }
     }
 
@@ -109,7 +132,7 @@ export async function uploadPhotos(
       story: meta.story || null,
       image_path: storagePath,
       is_approved: true,
-      display_order: baseOrder + i,
+      display_order: nextDisplayOrder++,
     })
 
     if (dbError) {

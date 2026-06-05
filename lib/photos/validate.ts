@@ -12,8 +12,8 @@ export type FileValidationResult =
 export function sniffImageMime(bytes: Uint8Array): AllowedPhotoMime | null {
   if (bytes.length < 12) return null
 
-  // JPEG
-  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'image/jpeg'
+  // JPEG (SOI marker FF D8; third byte may vary)
+  if (bytes[0] === 0xff && bytes[1] === 0xd8) return 'image/jpeg'
   // PNG
   if (
     bytes[0] === 0x89 &&

@@ -26,5 +26,17 @@ export function projectMutationError(
     return 'Tabela do banco não encontrada. Execute o schema SQL completo no Supabase (veja README).'
   }
 
+  if (
+    error.code === '22003' ||
+    error.message?.includes('integer out of range') ||
+    error.message?.includes('out of range for type integer')
+  ) {
+    return 'Erro interno ao ordenar a foto. Atualize o app e tente novamente.'
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    return `Erro (${error.code ?? 'unknown'}): ${error.message}`
+  }
+
   return 'Não foi possível concluir a operação. Tente novamente.'
 }
