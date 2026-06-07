@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { ArrowLeft, Pencil } from 'lucide-react'
+import { ArrowLeft, Pencil, Settings } from 'lucide-react'
 import { AppShell } from '@/components/layout/app-shell'
 import { PhotoGallery } from '@/components/photos/photo-gallery'
 import { PhotoUploadPanel } from '@/components/photos/photo-upload-panel'
@@ -84,6 +84,13 @@ export default async function ProjectDetailPage({ params }: PageProps) {
 
           {isOwner && (
             <div className="flex flex-wrap gap-2 shrink-0">
+              <Link
+                href={`/projects/${project.id}/admin`}
+                className={buttonVariants({ variant: 'outline', size: 'sm' })}
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                Admin
+              </Link>
               <Link
                 href={`/projects/${project.id}/edit`}
                 className={buttonVariants({ variant: 'outline', size: 'sm' })}

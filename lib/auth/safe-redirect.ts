@@ -2,7 +2,7 @@ const DEFAULT_REDIRECT = '/dashboard'
 
 /** UUID v4 (accepts any RFC variant nibble in position 13 for DB compatibility). */
 const PROJECT_PATH =
-  /^\/projects\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\/edit|\/slideshow)?$/i
+  /^\/projects\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\/edit|\/slideshow|\/admin)?$/i
 
 const INVITE_PATH =
   /^\/invite\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
