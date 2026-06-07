@@ -6,6 +6,7 @@ import { Users, Mail, ArrowRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { redeemProjectInvite } from '@/lib/invites/redeem'
 import { getInvitePreview } from '@/lib/invites/queries'
+import { getProjectAccess } from '@/lib/projects/queries'
 import { inviteRoleShortLabel } from '@/lib/invites/labels'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -36,6 +37,7 @@ export default async function InvitePage({ params }: PageProps) {
   let statusMessage: string | null = null
   let statusVariant: 'muted' | 'error' = 'muted'
   let projectLinkId: string | null = null
+  let loggedInAsOwner = false
 
   if (preview.isExpired) {
     statusMessage = 'Este convite expirou. Peça um novo link ao proprietário do projeto.'
@@ -43,16 +45,26 @@ export default async function InvitePage({ params }: PageProps) {
     statusMessage = 'Este convite já foi utilizado.'
     projectLinkId = preview.projectId
   } else if (user) {
-    const result = await redeemProjectInvite(token, user.id)
-    if (result.projectId && !result.error) {
-      redirect(`/projects/${result.projectId}`)
+    const access = await getProjectAccess(preview.projectId, user.id)
+
+    if (access?.isOwner) {
+      loggedInAsOwner = true
+      statusMessage =
+        'Você está conectado como proprietário deste projeto. Convites são para outras pessoas — ' +
+        'saia desta conta e entre com o e-mail do colaborador (ou use uma janela anônima).'
+      statusVariant = 'error'
+    } else {
+      const result = await redeemProjectInvite(token, user.id)
+      if (result.projectId && !result.error) {
+        redirect(`/projects/${result.projectId}`)
+      }
+      if (result.alreadyMember && result.projectId) {
+        redirect(`/projects/${result.projectId}`)
+      }
+      statusMessage = result.error ?? null
+      statusVariant = 'error'
+      if (result.projectId) projectLinkId = result.projectId
     }
-    if (result.alreadyMember && result.projectId) {
-      redirect(`/projects/${result.projectId}`)
-    }
-    statusMessage = result.error ?? null
-    statusVariant = 'error'
-    if (result.projectId) projectLinkId = result.projectId
   }
 
   const expiresLabel = format(new Date(preview.expiresAt), "d 'de' MMMM 'de' yyyy", {
@@ -119,6 +131,24 @@ export default async function InvitePage({ params }: PageProps) {
               >
                 {statusMessage}
               </p>
+            )}
+
+            {loggedInAsOwner && (
+              <form
+                action={`/auth/signout?redirectTo=${encodeURIComponent(invitePath)}`}
+                method="post"
+                className="pt-2"
+              >
+                <button
+                  type="submit"
+                  className={buttonVariants({
+                    variant: 'outline',
+                    className: 'w-full',
+                  })}
+                >
+                  Sair e entrar com outro e-mail
+                </button>
+              </form>
             )}
 
             {showLoginCta && (

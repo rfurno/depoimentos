@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { defaultDisplayNameFromEmail } from '@/lib/auth/display-name'
 import { parseUuid } from '@/lib/validation/uuid'
 import type { CollaboratorRole, Project, ProjectWithRole } from '@/lib/types'
 
@@ -16,7 +17,8 @@ export async function getDisplayName(userId: string, fallbackEmail?: string): Pr
     .maybeSingle()
 
   if (profile?.full_name) return profile.full_name
-  return fallbackEmail?.split('@')[0] || 'você'
+  if (fallbackEmail) return defaultDisplayNameFromEmail(fallbackEmail)
+  return 'você'
 }
 
 /** Projects owned by the user or where they are a collaborator. */
