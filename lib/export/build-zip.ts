@@ -1,5 +1,6 @@
 import JSZip from 'jszip'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { MAX_EXPORT_PHOTOS, MAX_EXPORT_TOTAL_BYTES } from '@/lib/export/constants'
 import { PHOTOS_BUCKET } from '@/lib/photos/constants'
 import { isSafePhotoStoragePath, storagePathMatchesProject } from '@/lib/storage/path-guard'
 import { buildMemoriesMarkdown } from '@/lib/export/memories-md'
@@ -31,6 +32,9 @@ export async function buildProjectExportZip(
   const data = await getExportPhotoRows(projectId, photoIds)
   if (!data) return { error: 'Projeto não encontrado.' }
   if (data.photos.length === 0) return { error: 'Nenhuma foto selecionada para exportar.' }
+  if (data.photos.length > MAX_EXPORT_PHOTOS) {
+    return { error: `Máximo de ${MAX_EXPORT_PHOTOS} fotos por exportação.` }
+  }
 
   const admin = createAdminClient()
   if (!admin) {
@@ -46,6 +50,8 @@ export async function buildProjectExportZip(
   const zip = new JSZip()
   const imagesFolder = zip.folder('images')
   if (!imagesFolder) return { error: 'Falha ao criar arquivo ZIP.' }
+
+  let totalBytes = 0
 
   for (let i = 0; i < data.photos.length; i++) {
     const photo = data.photos[i]
@@ -69,6 +75,12 @@ export async function buildProjectExportZip(
 
     const filename = safeFilename(i, photo.id, photo.title, photo.image_path)
     const arrayBuffer = await blob.arrayBuffer()
+    totalBytes += arrayBuffer.byteLength
+    if (totalBytes > MAX_EXPORT_TOTAL_BYTES) {
+      return {
+        error: `Exportação excede o limite de ${Math.round(MAX_EXPORT_TOTAL_BYTES / (1024 * 1024))} MB. Selecione menos fotos.`,
+      }
+    }
     imagesFolder.file(filename, arrayBuffer)
 
     const { data: comments } = await supabase

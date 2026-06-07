@@ -1,9 +1,5 @@
--- ============================================
--- Storage SELECT for private "photos" bucket
--- Run after fix-rls-recursion.sql (needs is_project_owner, is_project_member)
--- Prefer storage-approved-select-policy.sql for the full helper + policies.
--- Path format: {project_id}/{filename}
--- ============================================
+-- Fix: ERROR 42710 policy "photos_storage_select_member" already exists
+-- Run this alone in Supabase SQL Editor, then re-run storage-policies.sql if needed.
 
 create or replace function public.can_read_photo_storage(object_path text)
 returns boolean

@@ -1,10 +1,11 @@
 -- ============================================
--- Storage SELECT for private "photos" bucket
--- Run after fix-rls-recursion.sql (needs is_project_owner, is_project_member)
--- Prefer storage-approved-select-policy.sql for the full helper + policies.
--- Path format: {project_id}/{filename}
+-- SECURITY: Storage SELECT/INSERT aligned with photo approval + contributor role
+-- Run after fix-rls-recursion.sql (is_project_owner, is_project_member, can_contribute_to_project).
+-- Safe to re-run.
 -- ============================================
 
+-- Owners: any object under their project folder.
+-- Members: only objects linked to an approved photo row.
 create or replace function public.can_read_photo_storage(object_path text)
 returns boolean
 language sql
@@ -26,10 +27,19 @@ $$;
 grant execute on function public.can_read_photo_storage(text) to authenticated;
 
 drop policy if exists "photos_storage_select_member" on storage.objects;
+drop policy if exists "Authenticated users can upload photos" on storage.objects;
+drop policy if exists "photos_storage_insert_member" on storage.objects;
 
 create policy "photos_storage_select_member"
   on storage.objects for select to authenticated
   using (
     bucket_id = 'photos'
     and public.can_read_photo_storage(name)
+  );
+
+create policy "photos_storage_insert_member"
+  on storage.objects for insert to authenticated
+  with check (
+    bucket_id = 'photos'
+    and public.can_contribute_to_project((split_part(name, '/', 1))::uuid)
   );

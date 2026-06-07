@@ -44,12 +44,16 @@ async function assertPhotoInProject(
   const supabase = await createClient()
   const { data: photo } = await supabase
     .from('photos')
-    .select('id')
+    .select('id, is_approved')
     .eq('id', photoUuid)
     .eq('project_id', projectUuid)
     .maybeSingle()
 
   if (!photo) return { error: 'Foto não encontrada.' }
+
+  if (!access.isOwner && !photo.is_approved) {
+    return { error: 'Esta foto ainda não foi aprovada para comentários.' }
+  }
 
   return { projectUuid, photoUuid }
 }

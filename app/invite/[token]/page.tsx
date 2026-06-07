@@ -1,13 +1,13 @@
 import Link from 'next/link'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Users, Mail, ArrowRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { redeemProjectInvite } from '@/lib/invites/redeem'
 import { getInvitePreview } from '@/lib/invites/queries'
 import { getProjectAccess } from '@/lib/projects/queries'
 import { inviteRoleShortLabel } from '@/lib/invites/labels'
+import { InviteAcceptForm } from '@/components/invites/invite-accept-form'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -38,6 +38,8 @@ export default async function InvitePage({ params }: PageProps) {
   let statusVariant: 'muted' | 'error' = 'muted'
   let projectLinkId: string | null = null
   let loggedInAsOwner = false
+  let alreadyMember = false
+  let showAcceptForm = false
 
   if (preview.isExpired) {
     statusMessage = 'Este convite expirou. Peça um novo link ao proprietário do projeto.'
@@ -53,17 +55,12 @@ export default async function InvitePage({ params }: PageProps) {
         'Você está conectado como proprietário deste projeto. Convites são para outras pessoas — ' +
         'saia desta conta e entre com o e-mail do colaborador (ou use uma janela anônima).'
       statusVariant = 'error'
+    } else if (access) {
+      alreadyMember = true
+      statusMessage = 'Você já participa deste projeto.'
+      projectLinkId = preview.projectId
     } else {
-      const result = await redeemProjectInvite(token, user.id)
-      if (result.projectId && !result.error) {
-        redirect(`/projects/${result.projectId}`)
-      }
-      if (result.alreadyMember && result.projectId) {
-        redirect(`/projects/${result.projectId}`)
-      }
-      statusMessage = result.error ?? null
-      statusVariant = 'error'
-      if (result.projectId) projectLinkId = result.projectId
+      showAcceptForm = preview.canRedeem
     }
   }
 
@@ -151,6 +148,8 @@ export default async function InvitePage({ params }: PageProps) {
               </form>
             )}
 
+            {showAcceptForm && <InviteAcceptForm token={token} />}
+
             {showLoginCta && (
               <div className="space-y-3 pt-2">
                 <p className="text-sm text-center text-[#6b6057]">
@@ -170,9 +169,9 @@ export default async function InvitePage({ params }: PageProps) {
               </div>
             )}
 
-            {projectLinkId && (
+            {(projectLinkId || alreadyMember) && (
               <Link
-                href={`/projects/${projectLinkId}`}
+                href={`/projects/${projectLinkId ?? preview.projectId}`}
                 className={buttonVariants({ variant: 'outline', className: 'w-full' })}
               >
                 Ir para o projeto

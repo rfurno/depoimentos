@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { MAX_EXPORT_PHOTOS } from '@/lib/export/constants'
 import { buildProjectExportZip } from '@/lib/export/build-zip'
+import { checkExportRateLimit } from '@/lib/export/rate-limit'
 import { getProjectAccess } from '@/lib/projects/queries'
 import { parseUuid } from '@/lib/validation/uuid'
 
@@ -31,6 +33,16 @@ export async function GET(request: Request, context: RouteContext) {
     return NextResponse.json({ error: 'Apenas o proprietário pode exportar.' }, { status: 403 })
   }
 
+  const rateLimit = checkExportRateLimit(user.id)
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      {
+        error: `Limite de exportações atingido. Tente novamente em ${rateLimit.retryAfterSec ?? 60} segundos.`,
+      },
+      { status: 429 }
+    )
+  }
+
   const { searchParams } = new URL(request.url)
   const rawIds = searchParams.get('photoIds')
   const photoIds = rawIds
@@ -39,6 +51,13 @@ export async function GET(request: Request, context: RouteContext) {
         .map((s) => parseUuid(s.trim()))
         .filter((x): x is string => Boolean(x))
     : undefined
+
+  if (photoIds && photoIds.length > MAX_EXPORT_PHOTOS) {
+    return NextResponse.json(
+      { error: `Máximo de ${MAX_EXPORT_PHOTOS} fotos por exportação.` },
+      { status: 400 }
+    )
+  }
 
   const result = await buildProjectExportZip(projectUuid, photoIds)
   if ('error' in result) {

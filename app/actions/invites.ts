@@ -10,6 +10,7 @@ import {
   INVITE_DEFAULT_EXPIRY_DAYS,
   INVITE_EXPIRY_OPTIONS,
 } from '@/lib/invites/constants'
+import { redeemProjectInvite } from '@/lib/invites/redeem'
 import { getProjectAccess } from '@/lib/projects/queries'
 import { parseUuid } from '@/lib/validation/uuid'
 const inviteRoleSchema = z.enum(['contributor', 'viewer', 'admin'])
@@ -38,6 +39,11 @@ export type InviteActionState = {
     expiresInDays?: string[]
   }
   inviteUrl?: string
+}
+
+export type AcceptInviteState = {
+  error?: string
+  projectId?: string
 }
 
 async function getRequestOrigin(): Promise<string | undefined> {
@@ -102,6 +108,35 @@ export async function createProjectInvite(
 
   revalidatePath(`/projects/${id}`)
   return { inviteUrl }
+}
+
+export async function acceptProjectInvite(
+  token: string,
+  _prev: AcceptInviteState
+): Promise<AcceptInviteState> {
+  const tokenUuid = parseUuid(token)
+  if (!tokenUuid) return { error: 'Link de convite inválido.' }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'Você precisa estar conectado.' }
+
+  const result = await redeemProjectInvite(token, user.id)
+  if (result.error) {
+    return {
+      error: result.error,
+      projectId: result.projectId,
+    }
+  }
+
+  if (result.projectId) {
+    revalidatePath(`/projects/${result.projectId}`)
+  }
+
+  return { projectId: result.projectId }
 }
 
 export async function revokeProjectInvite(

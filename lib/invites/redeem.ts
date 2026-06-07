@@ -85,6 +85,31 @@ export async function redeemProjectInvite(
     }
   }
 
+  const redeemedAt = new Date().toISOString()
+
+  const { data: claimed, error: claimError } = await admin
+    .from('project_invites')
+    .update({
+      redeemed_at: redeemedAt,
+      redeemed_by: userId,
+    })
+    .eq('id', invite.id)
+    .is('redeemed_at', null)
+    .select('id')
+    .maybeSingle()
+
+  if (claimError) {
+    return { error: projectMutationError('redeemProjectInviteClaim', claimError) }
+  }
+
+  if (!claimed) {
+    return {
+      error: 'Este convite já foi utilizado.',
+      projectId: invite.project_id,
+      alreadyMember: true,
+    }
+  }
+
   const { error: insertError } = await admin.from('project_collaborators').insert({
     project_id: invite.project_id,
     user_id: userId,
@@ -93,18 +118,6 @@ export async function redeemProjectInvite(
 
   if (insertError) {
     return { error: projectMutationError('redeemProjectInvite', insertError) }
-  }
-
-  const { error: updateError } = await admin
-    .from('project_invites')
-    .update({
-      redeemed_at: new Date().toISOString(),
-      redeemed_by: userId,
-    })
-    .eq('id', invite.id)
-
-  if (updateError) {
-    return { error: projectMutationError('redeemProjectInviteUpdate', updateError) }
   }
 
   return { projectId: project.id, projectTitle: project.title }
