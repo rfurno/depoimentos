@@ -19,18 +19,18 @@ export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <Link
       href={`/projects/${project.id}`}
-      className="group block rounded-2xl border border-border bg-card p-6 shadow-sm transition hover:border-primary/40 hover:shadow-md"
+      className="story-card group block rounded-2xl border border-border bg-card p-6 card-elevated hover:border-brand/40"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-muted text-primary transition group-hover:bg-muted/80">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl icon-tile transition group-hover:scale-105">
           <FolderOpen className="h-5 w-5" />
         </div>
-        <Badge variant="secondary" className="bg-muted text-muted-foreground border-0">
+        <Badge variant="secondary" className="bg-bg-subtle text-text-secondary border-0">
           {roleLabel(project.role)}
         </Badge>
       </div>
 
-      <h3 className="mt-4 text-xl font-semibold tracking-tight text-foreground group-hover:text-primary">
+      <h3 className="mt-4 text-xl font-semibold tracking-tight text-foreground group-hover:text-brand transition-colors">
         {project.title}
       </h3>
 

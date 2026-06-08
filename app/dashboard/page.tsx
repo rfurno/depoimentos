@@ -28,7 +28,7 @@ export default async function DashboardPage() {
           <Link
             href="/projects/new"
             className={buttonVariants({
-              className: 'rounded-full bg-primary hover:bg-primary-dark px-5 text-white shrink-0',
+              className: 'btn-primary-gradient rounded-full font-semibold px-5 text-white shrink-0',
             })}
           >
             <Plus className="mr-2 h-4 w-4" /> Novo Projeto
@@ -36,9 +36,9 @@ export default async function DashboardPage() {
         </div>
 
         {projects.length === 0 ? (
-          <div className="rounded-2xl border border-border bg-card p-16 text-center">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
-              <ImageIcon className="h-8 w-8 text-primary" />
+          <div className="card-elevated rounded-2xl border p-16 text-center">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl icon-tile">
+              <ImageIcon className="h-8 w-8 icon-brand" />
             </div>
             <h3 className="text-2xl tracking-tight font-semibold mb-2">Nenhum projeto ainda</h3>
             <p className="text-muted-foreground max-w-sm mx-auto mb-8">
@@ -49,7 +49,7 @@ export default async function DashboardPage() {
               href="/projects/new"
               className={buttonVariants({
                 size: 'lg',
-                className: 'rounded-full px-8 bg-primary hover:bg-primary-dark text-white',
+                className: 'rounded-full px-8 btn-primary-gradient font-semibold',
               })}
             >
               Criar seu primeiro projeto

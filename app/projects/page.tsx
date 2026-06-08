@@ -28,7 +28,7 @@ export default async function ProjectsPage() {
           <Link
             href="/projects/new"
             className={buttonVariants({
-              className: 'rounded-full bg-primary hover:bg-primary-dark px-5 text-white shrink-0',
+              className: 'btn-primary-gradient rounded-full font-semibold px-5 text-white shrink-0',
             })}
           >
             <Plus className="mr-2 h-4 w-4" /> Novo Projeto
@@ -38,7 +38,7 @@ export default async function ProjectsPage() {
         {projects.length === 0 ? (
           <p className="text-muted-foreground text-center py-12">
             Nenhum projeto encontrado.{' '}
-            <Link href="/projects/new" className="text-primary underline">
+            <Link href="/projects/new" className="link-brand underline">
               Criar um agora
             </Link>
           </p>

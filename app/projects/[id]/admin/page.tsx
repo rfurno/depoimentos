@@ -54,7 +54,7 @@ export default async function ProjectAdminPage({ params }: PageProps) {
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
-            <div className="flex items-center gap-2 text-primary mb-1">
+            <div className="flex items-center gap-2 text-brand mb-1">
               <Settings className="h-5 w-5" />
               <span className="text-sm font-medium">Administração</span>
             </div>

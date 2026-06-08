@@ -13,7 +13,7 @@ export function AppShell({ displayName, children }: AppShellProps) {
         <div className="mx-auto max-w-6xl flex items-center justify-between px-6 h-16">
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 font-semibold tracking-tight text-xl text-foreground"
+            className="flex items-center gap-2 font-semibold tracking-tight text-xl text-foreground hover:text-brand transition-colors"
           >
             Storyloom
           </Link>

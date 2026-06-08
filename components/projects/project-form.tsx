@@ -37,7 +37,7 @@ export function ProjectForm({ mode, projectId, defaultValues }: ProjectFormProps
   const descriptionError = state.fieldErrors?.description?.[0]
 
   return (
-    <Card className="border-border shadow-sm max-w-lg w-full">
+    <Card className="card-elevated border rounded-2xl max-w-lg w-full">
       <CardHeader>
         <CardTitle className="text-2xl tracking-tight">
           {mode === 'create' ? 'Novo projeto' : 'Editar projeto'}
@@ -97,7 +97,7 @@ export function ProjectForm({ mode, projectId, defaultValues }: ProjectFormProps
             <Button
               type="submit"
               disabled={pending}
-              className="sm:flex-1 rounded-full bg-primary hover:bg-primary-dark text-white"
+              className="sm:flex-1 btn-primary-gradient rounded-full font-semibold"
             >
               {pending ? (
                 <>

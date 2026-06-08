@@ -71,7 +71,7 @@ export default async function InvitePage({ params }: PageProps) {
   const showLoginCta = !user && preview.canRedeem
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen hero-gradient flex flex-col">
       <header className="border-b border-border/60 bg-background/90 backdrop-blur-sm">
         <div className="mx-auto max-w-lg px-6 py-5 flex items-center justify-between">
           <Link href="/" className="font-semibold tracking-tight text-xl text-foreground">
@@ -90,10 +90,10 @@ export default async function InvitePage({ params }: PageProps) {
       </header>
 
       <main className="flex-1 flex items-center justify-center px-6 py-12">
-        <Card className="w-full max-w-md border-border shadow-sm">
+        <Card className="w-full max-w-md card-elevated border rounded-2xl">
           <CardHeader className="text-center pb-4">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-              <Users className="h-7 w-7 text-primary" />
+              <Users className="h-7 w-7 icon-brand" />
             </div>
             <CardTitle className="text-2xl tracking-tight">Convite para colaborar</CardTitle>
             <CardDescription className="text-base pt-2 text-muted-foreground">
@@ -160,7 +160,7 @@ export default async function InvitePage({ params }: PageProps) {
                   href={loginHref}
                   className={buttonVariants({
                     className:
-                      'w-full h-12 rounded-full bg-primary hover:bg-primary-dark text-base',
+                      'w-full h-12 btn-primary-gradient rounded-full font-semibold text-base',
                   })}
                 >
                   Entrar e aceitar convite

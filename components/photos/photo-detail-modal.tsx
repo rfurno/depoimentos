@@ -335,7 +335,7 @@ export function PhotoDetailModal({
 
               <section className="space-y-4" aria-labelledby="comments-heading">
                 <div className="flex items-center gap-2">
-                  <MessageCircle className="h-5 w-5 text-primary" />
+                  <MessageCircle className="h-5 w-5 icon-brand" />
                   <h2
                     id="comments-heading"
                     className="text-lg font-semibold tracking-tight text-foreground"
@@ -396,7 +396,7 @@ export function PhotoDetailModal({
                       type="button"
                       onClick={handleAddComment}
                       disabled={isPending || !newComment.trim()}
-                      className="bg-primary hover:bg-primary-dark text-white"
+                      className="btn-primary-gradient font-semibold"
                     >
                       {isPending ? (
                         <>

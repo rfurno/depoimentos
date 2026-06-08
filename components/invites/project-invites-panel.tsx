@@ -87,10 +87,10 @@ export function ProjectInvitesPanel({
   const pastInvites = invites.filter((i) => !i.isActive)
 
   return (
-    <Card className="border-border shadow-sm">
+    <Card className="card-elevated border rounded-2xl">
       <CardHeader>
         <CardTitle className="text-xl tracking-tight flex items-center gap-2">
-          <UserPlus className="h-5 w-5 text-primary" />
+          <UserPlus className="h-5 w-5 icon-brand" />
           Convidar família
         </CardTitle>
         <CardDescription className="text-muted-foreground">
@@ -99,20 +99,23 @@ export function ProjectInvitesPanel({
       </CardHeader>
       <CardContent className="space-y-6">
         {!hasServiceKey && (
-          <p className="text-sm text-destructive rounded-lg bg-destructive/10 px-4 py-3 border border-destructive/20">
+          <p className="text-sm text-destructive rounded-xl bg-destructive/10 px-4 py-3 border border-destructive/20">
             Configure <code className="text-xs bg-card px-1 rounded">SUPABASE_SERVICE_ROLE_KEY</code>{' '}
             para que convidados possam aceitar o convite após o login.
           </p>
         )}
 
-        <form action={formAction} className="space-y-4 rounded-lg border border-border bg-background p-4">
+        <form
+          action={formAction}
+          className="space-y-4 rounded-xl border border-border bg-bg-subtle p-4"
+        >
           {state.error && (
-            <p className="text-sm text-destructive rounded-lg bg-destructive/10 px-3 py-2 border border-destructive/20">
+            <p className="text-sm text-destructive rounded-xl bg-destructive/10 px-3 py-2 border border-destructive/20">
               {state.error}
             </p>
           )}
           {state.inviteUrl && (
-            <p className="text-sm text-primary rounded-lg bg-muted px-3 py-2">
+            <p className="text-sm text-brand rounded-xl bg-card px-3 py-2 border border-brand/20 shadow-sm">
               Novo link criado — copiado para a área de transferência.
             </p>
           )}
@@ -121,10 +124,7 @@ export function ProjectInvitesPanel({
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="invite-role">Papel no projeto</Label>
               <input type="hidden" name="role" value={role} />
-              <Select
-                value={role}
-                onValueChange={(v) => v && setRole(v as InviteRole)}
-              >
+              <Select value={role} onValueChange={(v) => v && setRole(v as InviteRole)}>
                 <SelectTrigger id="invite-role" className="w-full bg-card border-border">
                   <SelectValue />
                 </SelectTrigger>
@@ -150,16 +150,15 @@ export function ProjectInvitesPanel({
               {state.fieldErrors?.email?.[0] && (
                 <p className="text-sm text-destructive">{state.fieldErrors.email[0]}</p>
               )}
-              <p className="text-xs text-muted-foreground">Só uma dica na tela do convite — qualquer e-mail pode aceitar.</p>
+              <p className="text-xs text-muted-foreground">
+                Só uma dica na tela do convite — qualquer e-mail pode aceitar.
+              </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="invite-expires">Validade</Label>
               <input type="hidden" name="expiresInDays" value={expiresInDays} />
-              <Select
-                value={expiresInDays}
-                onValueChange={(v) => v && setExpiresInDays(v)}
-              >
+              <Select value={expiresInDays} onValueChange={(v) => v && setExpiresInDays(v)}>
                 <SelectTrigger id="invite-expires" className="w-full bg-card border-border">
                   <SelectValue />
                 </SelectTrigger>
@@ -177,7 +176,7 @@ export function ProjectInvitesPanel({
           <Button
             type="submit"
             disabled={pending}
-            className="rounded-full bg-primary hover:bg-primary-dark"
+            className="btn-primary-gradient rounded-full px-6 h-11 text-base font-semibold"
           >
             {pending ? (
               <>
@@ -245,20 +244,22 @@ function InviteListItem({
   past?: boolean
 }) {
   const expiresLabel = format(new Date(invite.expires_at), "d MMM yyyy", { locale: ptBR })
-  const status = invite.redeemed_at
-    ? 'Usado'
-    : invite.isExpired
-      ? 'Expirado'
-      : 'Ativo'
+  const isActive = !invite.redeemed_at && !invite.isExpired
+  const status = invite.redeemed_at ? 'Usado' : invite.isExpired ? 'Expirado' : 'Ativo'
 
   return (
-    <li className="flex flex-col gap-2 rounded-lg border border-border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+    <li className="flex flex-col gap-2 rounded-xl border border-border bg-card px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 space-y-1">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="secondary" className="bg-muted text-muted-foreground border-0 text-xs">
+          <Badge variant="secondary" className="bg-bg-subtle text-text-secondary border-0 text-xs">
             {inviteRoleShortLabel(invite.role)}
           </Badge>
-          <span className="text-xs text-muted-foreground">{status} · até {expiresLabel}</span>
+          {isActive ? (
+            <Badge className="badge-active text-xs">Ativo</Badge>
+          ) : (
+            <span className="text-xs text-muted-foreground">{status}</span>
+          )}
+          <span className="text-xs text-muted-foreground">até {expiresLabel}</span>
         </div>
         {invite.email && (
           <p className="text-xs text-muted-foreground truncate">{invite.email}</p>
@@ -266,7 +267,13 @@ function InviteListItem({
       </div>
       {!past && onCopy && onRevoke && (
         <div className="flex gap-2 shrink-0">
-          <Button type="button" variant="outline" size="sm" onClick={onCopy}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="border-brand/30 text-brand hover:bg-brand/5 hover:text-brand-dark"
+            onClick={onCopy}
+          >
             <Copy className="h-4 w-4 mr-1" />
             Copiar
           </Button>

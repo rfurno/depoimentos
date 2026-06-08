@@ -40,7 +40,7 @@ export function InviteAcceptForm({ token }: InviteAcceptFormProps) {
         disabled={pending}
         className={buttonVariants({
           className:
-            'w-full h-12 rounded-full bg-primary hover:bg-primary-dark text-base disabled:opacity-60',
+            'w-full h-12 btn-primary-gradient rounded-full font-semibold text-base disabled:opacity-60',
         })}
       >
         {pending ? (

@@ -9,7 +9,7 @@ export default function LandingPage() {
       <nav className="border-b border-border bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl btn-primary-gradient shadow-md">
               <Heart className="h-5 w-5" />
             </div>
             <div>
@@ -19,12 +19,12 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login">
-              <Button variant="ghost" className="text-foreground hover:bg-muted">
+              <Button variant="ghost" className="text-foreground hover:bg-bg-subtle">
                 Entrar
               </Button>
             </Link>
             <Link href="/login">
-              <Button className="bg-primary hover:bg-primary-dark text-white rounded-full px-6">
+              <Button className="btn-primary-gradient rounded-full px-6 h-10 font-semibold">
                 Começar
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -34,11 +34,11 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <div className="mx-auto max-w-5xl px-6 pt-16 pb-20 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full bg-card px-4 py-1 text-sm text-muted-foreground shadow-sm border border-border">
+      <div className="hero-gradient mx-auto max-w-5xl px-6 pt-16 pb-20 text-center">
+        <div className="inline-flex items-center gap-2 rounded-full bg-card px-4 py-1.5 text-sm text-muted-foreground shadow-sm border border-border">
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-brand"></span>
           </span>
           Privado por design. Feito para famílias.
         </div>
@@ -53,12 +53,16 @@ export default function LandingPage() {
 
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/login">
-            <Button size="lg" className="h-14 px-10 text-lg rounded-full bg-primary hover:bg-primary-dark text-white shadow-sm">
+            <Button size="lg" className="btn-primary-gradient h-14 px-10 text-lg rounded-full font-semibold">
               Iniciar um projeto familiar <ArrowRight className="ml-2" />
             </Button>
           </Link>
           <Link href="#how">
-            <Button size="lg" variant="outline" className="h-14 px-8 text-lg rounded-full border-primary/30 text-foreground hover:bg-card">
+            <Button
+              size="lg"
+              variant="outline"
+              className="h-14 px-8 text-lg rounded-full border-brand/35 text-foreground hover:bg-card hover:border-brand/50"
+            >
               Ver como funciona
             </Button>
           </Link>
@@ -70,7 +74,7 @@ export default function LandingPage() {
       <div id="how" className="bg-card border-y border-border">
         <div className="mx-auto max-w-6xl px-6 py-16 grid md:grid-cols-3 gap-8">
           <div className="space-y-3">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary text-brand-secondary">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl icon-tile">
               <Camera className="h-6 w-6" />
             </div>
             <h3 className="font-semibold text-2xl tracking-tight">Histórias em fotos, juntos</h3>
@@ -79,7 +83,7 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="space-y-3">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/25 text-foreground">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl icon-tile-accent">
               <Users className="h-6 w-6" />
             </div>
             <h3 className="font-semibold text-2xl tracking-tight">Convites e papéis seguros</h3>
@@ -88,7 +92,7 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="space-y-3">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-muted text-primary">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl icon-tile-primary">
               <Shield className="h-6 w-6" />
             </div>
             <h3 className="font-semibold text-2xl tracking-tight">Seu para sempre, exporte a qualquer momento</h3>
@@ -102,7 +106,7 @@ export default function LandingPage() {
       {/* Trust / mobile note */}
       <div className="mx-auto max-w-3xl px-6 py-14 text-center text-muted-foreground">
         <p className="text-sm">
-          Construído com Supabase para autenticação e armazenamento sólidos. Prioridade mobile. Apresentações amigáveis ao polegar. 
+          Construído com Supabase para autenticação e armazenamento sólidos. Prioridade mobile. Apresentações amigáveis ao polegar.
           Nenhum dado sai do projeto privado da sua família a menos que você exporte.
         </p>
       </div>
@@ -115,7 +119,7 @@ export default function LandingPage() {
             <div className="text-muted-foreground text-sm">Leva 30 segundos para criar seu primeiro projeto.</div>
           </div>
           <Link href="/login">
-            <Button className="rounded-full bg-primary hover:bg-primary-dark px-8 h-12 text-base">
+            <Button className="btn-primary-gradient rounded-full px-8 h-12 text-base font-semibold">
               Crie seu primeiro Storyloom
             </Button>
           </Link>

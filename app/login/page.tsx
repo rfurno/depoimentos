@@ -9,7 +9,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="mb-8 flex justify-center">
           <Link href="/" className="flex items-center gap-3 text-foreground">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl btn-primary-gradient shadow-md">
               <Heart className="h-5 w-5" />
             </div>
             <span className="font-semibold tracking-tight text-2xl">Storyloom</span>

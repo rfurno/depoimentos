@@ -106,10 +106,10 @@ export function PhotoUploadPanel({ projectId }: PhotoUploadPanelProps) {
   }
 
   return (
-    <Card className="border-border shadow-sm">
+    <Card className="card-elevated border rounded-2xl">
       <CardHeader>
         <CardTitle className="text-xl tracking-tight flex items-center gap-2">
-          <ImagePlus className="h-5 w-5 text-primary" />
+          <ImagePlus className="h-5 w-5 icon-brand" />
           Adicionar fotos
         </CardTitle>
         <CardDescription className="text-muted-foreground">
@@ -215,7 +215,7 @@ export function PhotoUploadPanel({ projectId }: PhotoUploadPanelProps) {
             <Button
               type="submit"
               disabled={isUploading}
-              className="w-full rounded-full bg-primary hover:bg-primary-dark text-white"
+              className="w-full btn-primary-gradient rounded-full font-semibold"
             >
               {isUploading ? (
                 <>

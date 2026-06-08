@@ -84,7 +84,7 @@ export function LoginForm() {
 
   if (isConfigError) {
     return (
-      <Card className="border-destructive shadow-sm bg-destructive/10">
+      <Card className="border-destructive card-elevated border rounded-2xl bg-destructive/10">
         <CardHeader className="text-center pb-4">
           <CardTitle className="text-2xl tracking-tight text-destructive">Configuração necessária</CardTitle>
           <CardDescription className="text-base pt-2 text-muted-foreground">
@@ -94,7 +94,7 @@ export function LoginForm() {
         <CardContent className="space-y-4 text-sm text-foreground">
           <ol className="list-decimal pl-5 space-y-2">
             <li>Copie o arquivo <code className="bg-card px-1 rounded">.env.example</code> para <code className="bg-card px-1 rounded">.env.local</code></li>
-            <li>Crie um projeto gratuito em <a href="https://supabase.com" target="_blank" className="underline text-primary">supabase.com</a></li>
+            <li>Crie um projeto gratuito em <a href="https://supabase.com" target="_blank" className="link-brand underline">supabase.com</a></li>
             <li>Copie a <strong>Project URL</strong> e a <strong>anon public key</strong> do seu projeto (em Settings → API)</li>
             <li>Cole os valores em <code className="bg-card px-1 rounded">.env.local</code></li>
             <li>Execute o SQL do schema que está no <code className="bg-card px-1 rounded">README.md</code></li>
@@ -117,10 +117,10 @@ export function LoginForm() {
 
   if (emailSent) {
     return (
-      <Card className="border-border shadow-sm">
+      <Card className="card-elevated border rounded-2xl">
         <CardHeader className="text-center pb-4">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-            <CheckCircle className="h-7 w-7 text-primary" />
+            <CheckCircle className="h-7 w-7 icon-brand" />
           </div>
           <CardTitle className="text-2xl tracking-tight">Verifique seu e-mail</CardTitle>
           <CardDescription className="text-base pt-2">
@@ -133,11 +133,12 @@ export function LoginForm() {
           <p>
             Não recebeu? Verifique o spam, ou{" "}
             <button
+              type="button"
               onClick={() => {
                 setEmailSent(false);
                 form.reset({ email: sentTo });
               }}
-              className="text-primary underline hover:no-underline font-medium"
+              className="link-brand underline hover:no-underline font-medium"
             >
               tente novamente
             </button>
@@ -156,7 +157,7 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="border-border shadow-sm">
+    <Card className="card-elevated border rounded-2xl">
       <CardHeader className="space-y-1 pb-6">
         <CardTitle className="text-3xl tracking-tighter">Bem-vindo de volta</CardTitle>
         <CardDescription className="text-base">
@@ -191,7 +192,7 @@ export function LoginForm() {
 
           <Button
             type="submit"
-            className="w-full h-12 text-base rounded-full bg-primary hover:bg-primary-dark disabled:opacity-70"
+            className="w-full h-12 text-base btn-primary-gradient rounded-full font-semibold disabled:opacity-70"
             disabled={isLoading}
           >
             {isLoading ? (

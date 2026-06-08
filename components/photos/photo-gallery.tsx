@@ -53,9 +53,9 @@ export function PhotoGallery({
 
   if (photos.length === 0) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-12 text-center">
-        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
-          <Images className="h-7 w-7 text-primary" />
+      <div className="card-elevated rounded-2xl border p-12 text-center">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl icon-tile">
+          <Images className="h-7 w-7 icon-brand" />
         </div>
         <h2 className="text-xl font-semibold tracking-tight mb-2">Nenhuma foto ainda</h2>
         <p className="text-muted-foreground max-w-md mx-auto text-sm">
@@ -97,7 +97,7 @@ export function PhotoGallery({
           <div className="flex gap-2 shrink-0">
             <Button
               type="button"
-              className="bg-primary hover:bg-primary-dark text-white"
+              className="btn-primary-gradient font-semibold"
               onClick={() => openSlideshow()}
             >
               <Play className="mr-2 h-4 w-4" />

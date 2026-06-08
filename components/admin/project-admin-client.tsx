@@ -117,10 +117,10 @@ export function ProjectAdminClient({
 
   return (
     <div className="space-y-10">
-      <Card className="border-border shadow-sm">
+      <Card className="card-elevated border rounded-2xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
-            <Shield className="h-5 w-5 text-primary" />
+            <Shield className="h-5 w-5 icon-brand" />
             Exportar para história com IA
           </CardTitle>
           <CardDescription className="text-muted-foreground">
@@ -147,7 +147,7 @@ export function ProjectAdminClient({
               type="button"
               onClick={handleExport}
               disabled={exporting || selected.size === 0}
-              className="rounded-full bg-primary hover:bg-primary-dark"
+              className="btn-primary-gradient rounded-full font-semibold"
             >
               {exporting ? (
                 <>
@@ -520,7 +520,7 @@ function PhotoAdminRow({
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="text-primary"
+                    className="text-brand hover:text-brand-dark"
                     disabled={isPending}
                     onClick={() => toggleApproval(true)}
                   >
