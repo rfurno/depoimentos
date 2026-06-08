@@ -14,7 +14,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Mail, Loader2, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { sanitizeRedirectPath } from "@/lib/auth/safe-redirect";
+import {
+  inviteTokenFromPath,
+  parseInviteToken,
+  sanitizeRedirectPath,
+} from "@/lib/auth/safe-redirect";
 
 const loginSchema = z.object({
   email: z.string().email("Por favor, insira um endereço de e-mail válido"),
@@ -29,6 +33,10 @@ export function LoginForm() {
 
   const searchParams = useSearchParams();
   const redirectTo = sanitizeRedirectPath(searchParams.get("redirectTo"));
+  const inviteToken =
+    parseInviteToken(searchParams.get("invite")) ??
+    inviteTokenFromPath(redirectTo);
+  const isInviteFlow = Boolean(inviteToken);
   const errorParam = searchParams.get("error");
   const isConfigError = errorParam === 'supabase_not_configured';
 
@@ -53,10 +61,13 @@ export function LoginForm() {
       // Use canonical app URL from env when set (recommended for production + Supabase dashboard config).
       // Falls back to current origin for local/dev. Always configure the exact URL(s) in Supabase Auth settings.
       const appOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+      const callbackUrl = inviteToken
+        ? `${appOrigin}/auth/callback?invite=${encodeURIComponent(inviteToken)}`
+        : `${appOrigin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`
       const { error } = await supabase.auth.signInWithOtp({
         email: data.email,
         options: {
-          emailRedirectTo: `${appOrigin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
+          emailRedirectTo: callbackUrl,
         },
       });
 
@@ -67,7 +78,9 @@ export function LoginForm() {
       setSentTo(data.email);
       setEmailSent(true);
       toast.success("Link mágico enviado! Verifique sua caixa de entrada.", {
-        description: "O link fará o login instantaneamente e o redirecionará de volta aqui.",
+        description: isInviteFlow
+          ? "Ao clicar no link, você entrará e será levado direto ao projeto."
+          : "O link fará o login instantaneamente e o redirecionará de volta aqui.",
       });
     } catch (error: unknown) {
       // SECURITY: Do not log full error objects (may contain tokens, emails, internal details).
@@ -129,7 +142,11 @@ export function LoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 text-center text-sm text-muted-foreground">
-          <p>Clique no link do e-mail para entrar. Ele expira em alguns minutos por segurança.</p>
+          <p>
+            {isInviteFlow
+              ? "Clique no link do e-mail para entrar e aceitar o convite automaticamente — você irá direto ao projeto."
+              : "Clique no link do e-mail para entrar. Ele expira em alguns minutos por segurança."}
+          </p>
           <p>
             Não recebeu? Verifique o spam, ou{" "}
             <button
@@ -159,9 +176,13 @@ export function LoginForm() {
   return (
     <Card className="card-elevated border rounded-2xl">
       <CardHeader className="space-y-1 pb-6">
-        <CardTitle className="text-3xl tracking-tighter">Bem-vindo de volta</CardTitle>
+        <CardTitle className="text-3xl tracking-tighter">
+          {isInviteFlow ? "Entrar e aceitar convite" : "Bem-vindo de volta"}
+        </CardTitle>
         <CardDescription className="text-base">
-          Entre com um link mágico. Sem senha necessária.
+          {isInviteFlow
+            ? "Informe seu e-mail. Após clicar no link mágico, você entra e vai direto ao projeto — sem etapa extra."
+            : "Entre com um link mágico. Sem senha necessária."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -201,7 +222,8 @@ export function LoginForm() {
               </>
             ) : (
               <>
-                <Mail className="mr-2 h-4 w-4" /> Enviar link mágico
+                <Mail className="mr-2 h-4 w-4" />{" "}
+                {isInviteFlow ? "Enviar link e aceitar convite" : "Enviar link mágico"}
               </>
             )}
           </Button>

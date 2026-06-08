@@ -7,6 +7,23 @@ const PROJECT_PATH =
 const INVITE_PATH =
   /^\/invite\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
+const INVITE_TOKEN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/** Validate invite token from query param (UUID only). */
+export function parseInviteToken(raw: string | null | undefined): string | null {
+  if (!raw || typeof raw !== 'string') return null
+  const token = raw.trim()
+  return INVITE_TOKEN.test(token) ? token : null
+}
+
+/** Extract invite token from a sanitized `/invite/{token}` path. */
+export function inviteTokenFromPath(path: string): string | null {
+  const match = path.match(/^\/invite\/([^/?#]+)/i)
+  if (!match) return null
+  return parseInviteToken(match[1])
+}
+
 /**
  * Sanitize post-login redirect paths to prevent open redirects and path traversal.
  * Only allows /dashboard, /projects, /projects/:uuid[/edit|/slideshow], and /invite/:token.

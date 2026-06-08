@@ -20,7 +20,7 @@ Plano completo em [project-instructions.md](./project-instructions.md). Todas as
 | 3 | Upload e galeria de fotos (signed URLs) | ✅ |
 | 4 | Comentários + modal de detalhes da foto | ✅ |
 | 5 | Apresentação de slides (teclado, swipe, overlay) | ✅ |
-| 6 | Convites por link seguro + aceite explícito | ✅ |
+| 6 | Convites por link seguro + auto-aceite após magic link | ✅ |
 | 7 | Admin (moderação, colaboradores, export ZIP) | ✅ |
 | 8 | Polimento, mobile-first, empty states, README | ✅ |
 
@@ -31,7 +31,7 @@ Plano completo em [project-instructions.md](./project-instructions.md). Todas as
 - **Galeria mobile-first** — busca, badges de comentários, fotos pendentes para o dono
 - **Comentários** — sob cada foto; moderação hierárquica no painel admin
 - **Apresentação** — tela cheia, deslize no celular, legenda/comentários em painel inferior
-- **Convites** — links UUID com validade; aceite explícito após login (não auto-resgate)
+- **Convites** — links UUID com validade; auto-aceite após magic link (um clique no e-mail); aceite manual se já logado
 - **Export ZIP** — imagens + `MEMORIES.md` + `memories.json` (limites de taxa e tamanho)
 - **Segurança** — RLS, bucket privado, signed URLs no servidor, políticas endurecidas
 
@@ -509,7 +509,7 @@ Vercel + Supabase é uma excelente combinação — edge functions, imagens ráp
 - Rotas protegidas por middleware + `getUser()` no servidor
 - RLS do Supabase como fonte da verdade; helpers `is_project_*` evitam recursão
 - Bucket `photos` privado; imagens via signed URLs geradas no servidor
-- Convites: aceite explícito (POST), resgate atômico `WHERE redeemed_at IS NULL`
+- Convites: auto-aceite no `/auth/callback?invite=…` após magic link; aceite manual (POST) se já logado; resgate atômico `WHERE redeemed_at IS NULL`
 - Export: limite de fotos/tamanho + rate limit por usuário
 - Comentários em fotos não aprovadas bloqueados para não-donos
 - `project_invites`: SELECT anônimo amplo revogado; lookup por token no servidor

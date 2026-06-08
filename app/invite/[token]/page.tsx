@@ -14,12 +14,22 @@ import { Badge } from '@/components/ui/badge'
 
 export const dynamic = 'force-dynamic'
 
-type PageProps = {
-  params: Promise<{ token: string }>
+function decodeQueryError(raw: string): string {
+  try {
+    return decodeURIComponent(raw)
+  } catch {
+    return raw
+  }
 }
 
-export default async function InvitePage({ params }: PageProps) {
+type PageProps = {
+  params: Promise<{ token: string }>
+  searchParams: Promise<{ error?: string }>
+}
+
+export default async function InvitePage({ params, searchParams }: PageProps) {
   const { token } = await params
+  const { error: inviteError } = await searchParams
   const preview = await getInvitePreview(token)
 
   if (!preview) {
@@ -32,7 +42,7 @@ export default async function InvitePage({ params }: PageProps) {
   } = await supabase.auth.getUser()
 
   const invitePath = `/invite/${preview.token}`
-  const loginHref = `/login?redirectTo=${encodeURIComponent(invitePath)}`
+  const loginHref = `/login?invite=${encodeURIComponent(preview.token)}`
 
   let statusMessage: string | null = null
   let statusVariant: 'muted' | 'error' = 'muted'
@@ -118,6 +128,12 @@ export default async function InvitePage({ params }: PageProps) {
               </p>
             )}
 
+            {inviteError && (
+              <p className="text-sm rounded-lg px-4 py-3 border text-destructive bg-destructive/10 border-destructive/20">
+                {decodeQueryError(inviteError)}
+              </p>
+            )}
+
             {statusMessage && (
               <p
                 className={`text-sm rounded-lg px-4 py-3 border ${
@@ -153,8 +169,8 @@ export default async function InvitePage({ params }: PageProps) {
             {showLoginCta && (
               <div className="space-y-3 pt-2">
                 <p className="text-sm text-center text-muted-foreground">
-                  Entre com seu e-mail (link mágico, sem senha) para aceitar o convite e ver as fotos
-                  do projeto.
+                  Entre com seu e-mail (link mágico, sem senha). Após clicar no link, você será
+                  adicionado ao projeto automaticamente.
                 </p>
                 <Link
                   href={loginHref}

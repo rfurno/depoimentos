@@ -3,7 +3,8 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getSupabaseConfig } from '@/lib/env'
-import { sanitizeRedirectPath } from '@/lib/auth/safe-redirect'
+import { parseInviteToken, sanitizeRedirectPath } from '@/lib/auth/safe-redirect'
+import { redeemProjectInvite } from '@/lib/invites/redeem'
 import type { Database } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
@@ -38,6 +39,22 @@ export async function GET(request: NextRequest) {
   const { error } = await supabase.auth.exchangeCodeForSession(code)
   if (error) {
     return NextResponse.redirect(`${origin}/login?error=auth_failed`)
+  }
+
+  const inviteToken = parseInviteToken(searchParams.get('invite'))
+  if (inviteToken) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (user) {
+      const result = await redeemProjectInvite(inviteToken, user.id)
+      if (result.projectId) {
+        return NextResponse.redirect(`${origin}/projects/${result.projectId}`)
+      }
+      const inviteError = encodeURIComponent(result.error ?? 'Não foi possível aceitar o convite.')
+      return NextResponse.redirect(`${origin}/invite/${inviteToken}?error=${inviteError}`)
+    }
   }
 
   return redirectResponse

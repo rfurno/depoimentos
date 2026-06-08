@@ -141,37 +141,46 @@ sequenceDiagram
 
 ---
 
-## 4. Convidado — aceitar convite
+## 4. Convidado — aceitar convite (fluxo simplificado)
 
-**Objetivo:** entrar no projeto da família após receber o link.
+**Objetivo:** permitir que o convidado aceite o convite e acesse o projeto com o mínimo de fricção possível (idealmente sem login em duas etapas).
 
 ```mermaid
 flowchart TD
-    A[Abre /invite/token] --> B{Convite válido?}
-    B -->|não| N[404 ou mensagem expirado/usado]
-    B -->|sim| C{Usuário logado?}
-    
-    C -->|não| D[Entrar e aceitar convite → /login?redirectTo=...]
-    D --> E[Magic link → callback]
-    E --> A
-    
-    C -->|sim, já membro| F[Ir para o projeto]
-    C -->|sim, é o dono| G[Mensagem: sair e usar outro e-mail]
-    C -->|sim, novo membro| H[Formulário Aceitar convite]
-    
-    H --> I[POST acceptProjectInvite]
-    I --> J["/projects/id"]
+    Start[Clica no link do convite<br/>/invite/token] --> Valid{Convite válido?}
+
+    Valid -->|Não| Expired[Mostrar: Convite expirado ou já usado]
+    Valid -->|Sim| Logged{Usuário logado?}
+
+    Logged -->|Não| Login[Tela: Entrar e Aceitar Convite]
+    Login --> Magic[Envia Magic Link<br/>com invite token no redirect]
+    Magic --> Callback[/auth/callback?invite=token]
+    Callback --> AutoAccept[Auto-aceitar convite]
+    AutoAccept --> AddMember[Adicionar como colaborador]
+    AddMember --> Project["/projects/id — direto ao projeto"]
+
+    Logged -->|Sim| Member{É membro do projeto?}
+    Member -->|Sim| Project
+    Member -->|Não| AcceptScreen[Tela: Aceitar Convite]
+    AcceptScreen --> ClickAccept[Clica em Aceitar Convite]
+    ClickAccept --> AddMember
+
+    Project --> Session[Sessão mantida via cookies]
+    Session --> Future[Próximas visitas abrem direto<br/>se estiver logado]
 ```
 
-| Situação | O que o usuário vê |
-|----------|-------------------|
-| Não logado, convite válido | **Entrar e aceitar convite** → login com retorno ao convite |
-| Logado, pode aceitar | Botão **Aceitar convite** (ação explícita; não resgata só ao abrir a página) |
-| Já é membro | Mensagem + link **Ir para o projeto** |
-| Dono logado no próprio convite | Aviso para sair ou usar janela anônima |
-| Convite expirado / usado | Mensagem explicativa; sem aceite |
+| Situação | O que acontece |
+|----------|----------------|
+| **Não logado**, convite válido | `/login?invite={token}` → magic link com `/auth/callback?invite={token}` → **aceite automático** → `/projects/{id}` |
+| **Logado**, ainda não é membro | Uma tela com botão **Aceitar convite** (único clique extra) |
+| **Já é membro** | Link **Ir para o projeto** |
+| **Dono logado** no próprio convite | Aviso para sair e entrar com outro e-mail |
+| **Convite inválido** | 404, expirado ou já usado |
+| **Falha no auto-aceite** | Retorno a `/invite/{token}?error=...` com mensagem |
 
-Após aceite: linha em `project_collaborators` com o papel do convite; redirecionamento para a galeria do projeto.
+**Implementação:** o resgate usa `redeemProjectInvite` no callback de auth (server-side, service role). Quem já está logado continua com aceite explícito via `InviteAcceptForm` — evita surpresas em contas já abertas.
+
+Após aceite: linha em `project_collaborators` com o papel do convite; sessão persiste para visitas futuras.
 
 ---
 

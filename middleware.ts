@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { sanitizeRedirectPath } from '@/lib/auth/safe-redirect'
+import { parseInviteToken, sanitizeRedirectPath } from '@/lib/auth/safe-redirect'
 import { getSupabaseConfig, validateEnv } from '@/lib/env'
 
 // Run validation for console warnings on every request in dev
@@ -89,10 +89,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // If user is logged in and trying to access auth pages, honor redirectTo when safe
+  // If user is logged in and trying to access auth pages, honor invite or redirectTo
   if (user && isAuthPage) {
     const url = request.nextUrl.clone()
-    url.pathname = sanitizeRedirectPath(request.nextUrl.searchParams.get('redirectTo'))
+    const inviteToken = parseInviteToken(request.nextUrl.searchParams.get('invite'))
+    url.pathname = inviteToken ? `/invite/${inviteToken}` : sanitizeRedirectPath(request.nextUrl.searchParams.get('redirectTo'))
     url.search = ''
     return NextResponse.redirect(url)
   }
