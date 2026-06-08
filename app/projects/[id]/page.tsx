@@ -55,7 +55,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
 
   return (
     <AppShell displayName={displayName}>
-      <main className="mx-auto max-w-5xl px-6 py-12">
+      <main className="page-container">
         <Link
           href="/dashboard"
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
@@ -72,7 +72,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               </Badge>
               <span className="text-xs text-muted-foreground">Criado em {createdLabel}</span>
             </div>
-            <h1 className="text-4xl tracking-tighter font-semibold text-foreground">
+            <h1 className="text-3xl sm:text-4xl tracking-tighter font-semibold text-foreground">
               {project.title}
             </h1>
             {project.description ? (
@@ -83,7 +83,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           </div>
 
           {isOwner && (
-            <div className="flex flex-wrap gap-2 shrink-0">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2 shrink-0 w-full sm:w-auto">
               <Link
                 href={`/projects/${project.id}/admin`}
                 className={buttonVariants({ variant: 'outline', size: 'sm' })}

@@ -7,18 +7,18 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background text-foreground">
       {/* Nav */}
       <nav className="border-b border-border bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 py-4 sm:py-5">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl btn-primary-gradient shadow-md">
               <Heart className="h-5 w-5" />
             </div>
             <div>
               <div className="font-semibold tracking-tight text-xl">Storyloom</div>
-              <div className="text-[10px] text-muted-foreground -mt-1">histórias de família, preservadas</div>
+              <div className="text-[10px] text-muted-foreground -mt-1 hidden sm:block">histórias de família, preservadas</div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/login">
+            <Link href="/login" className="hidden sm:inline-flex">
               <Button variant="ghost" className="text-foreground hover:bg-muted">
                 Entrar
               </Button>
@@ -34,7 +34,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <div className="hero-gradient mx-auto max-w-5xl px-6 pt-16 pb-20 text-center">
+      <div className="hero-gradient mx-auto max-w-5xl px-4 sm:px-6 pt-12 sm:pt-16 pb-16 sm:pb-20 text-center">
         <div className="inline-flex items-center gap-2 rounded-full bg-card px-4 py-1.5 text-sm text-muted-foreground shadow-sm border border-border">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"></span>
@@ -43,7 +43,7 @@ export default function LandingPage() {
           Privado por design. Feito para famílias.
         </div>
 
-        <h1 className="mt-8 text-6xl md:text-7xl font-semibold tracking-tighter leading-none text-balance">
+        <h1 className="mt-8 text-4xl sm:text-6xl md:text-7xl font-semibold tracking-tighter leading-none text-balance">
           As histórias de família<br />que você nunca quer esquecer.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-xl text-muted-foreground">
@@ -72,7 +72,7 @@ export default function LandingPage() {
 
       {/* Features */}
       <div id="how" className="bg-card border-y border-border">
-        <div className="mx-auto max-w-6xl px-6 py-16 grid md:grid-cols-3 gap-8">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12 sm:py-16 grid md:grid-cols-3 gap-8">
           <div className="space-y-3">
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl icon-tile">
               <Camera className="h-6 w-6" />
@@ -104,7 +104,7 @@ export default function LandingPage() {
       </div>
 
       {/* Trust / mobile note */}
-      <div className="mx-auto max-w-3xl px-6 py-14 text-center text-muted-foreground">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10 sm:py-14 text-center text-muted-foreground">
         <p className="text-sm">
           Construído com Supabase para autenticação e armazenamento sólidos. Prioridade mobile. Apresentações amigáveis ao polegar.
           Nenhum dado sai do projeto privado da sua família a menos que você exporte.
@@ -113,7 +113,7 @@ export default function LandingPage() {
 
       {/* CTA footer */}
       <div className="border-t border-border bg-card">
-        <div className="mx-auto max-w-6xl px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-12 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <div className="font-medium">Pronto para começar a preservar histórias?</div>
             <div className="text-muted-foreground text-sm">Leva 30 segundos para criar seu primeiro projeto.</div>

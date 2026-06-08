@@ -10,10 +10,10 @@ export function AppShell({ displayName, children }: AppShellProps) {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/90 backdrop-blur sticky top-0 z-40">
-        <div className="mx-auto max-w-6xl flex items-center justify-between px-6 h-16">
+        <div className="mx-auto max-w-6xl flex items-center justify-between px-4 sm:px-6 h-14 sm:h-16">
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 font-semibold tracking-tight text-xl text-foreground hover:text-brand transition-colors"
+            className="flex items-center gap-2 font-semibold tracking-tight text-lg sm:text-xl text-foreground hover:text-brand transition-colors"
           >
             Storyloom
           </Link>

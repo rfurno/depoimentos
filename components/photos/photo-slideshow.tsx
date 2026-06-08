@@ -9,6 +9,7 @@ import { ptBR } from 'date-fns/locale'
 import {
   ChevronLeft,
   ChevronRight,
+  Images,
   Info,
   Loader2,
   MessageCircle,
@@ -24,6 +25,7 @@ import { SLIDESHOW_AUTO_ADVANCE_MS } from '@/lib/slideshow/constants'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { EmptyState } from '@/components/ui/empty-state'
 
 export type PhotoSlideshowProps = {
   photos: GalleryPhoto[]
@@ -236,17 +238,28 @@ export function PhotoSlideshow({
   if (photos.length === 0) {
     if (mode === 'standalone') {
       return (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-story-dark text-white p-6">
-          <p className="text-lg mb-4">Nenhuma foto para exibir na apresentação.</p>
-          {backHref ? (
-            <Link href={backHref} className="text-accent hover:underline text-sm">
-              Voltar ao projeto
-            </Link>
-          ) : (
-            <Button type="button" variant="outline" onClick={onClose}>
-              Fechar
-            </Button>
-          )}
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-story-dark p-6">
+          <div className="w-full max-w-md [&_.card-elevated]:bg-white/10 [&_.card-elevated]:border-white/15 [&_h3]:text-white [&_p]:text-white/70">
+            <EmptyState
+              icon={Images}
+              title="Nenhuma foto para exibir"
+              description="Adicione fotos ao projeto para iniciar a apresentação em tela cheia."
+              compact
+            >
+              {backHref ? (
+                <Link
+                  href={backHref}
+                  className="inline-flex h-11 items-center justify-center rounded-full border border-white/25 bg-white/10 px-6 text-sm font-medium text-white hover:bg-white/20 w-full sm:w-auto"
+                >
+                  Voltar ao projeto
+                </Link>
+              ) : (
+                <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto">
+                  Fechar
+                </Button>
+              )}
+            </EmptyState>
+          </div>
         </div>
       )
     }

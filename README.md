@@ -10,13 +10,30 @@ Construído com Next.js 15, Supabase, Tailwind + shadcn/ui, com foco em seguran�
 
 ## Status das Fases
 
-Este projeto está sendo construído de forma iterativa seguindo o plano detalhado em [project-instructions.md](./project-instructions.md).
+Plano completo em [project-instructions.md](./project-instructions.md). Todas as fases foram implementadas:
 
-- ✅ **Fase 0 – Fundação** (atual): inicialização do Next.js, todas as dependências, shadcn/ui, clientes Supabase + middleware, autenticação (links mágicos), landing, login, shell básico do painel, tema herança acolhedor, documentação completa.
-- ⏳ **Fase 1**: projeto Supabase + schema (SQL abaixo) + bucket de armazenamento. Após você confirmar que a fundação + DB estão conectados, prosseguimos.
-- ⏳ Fase 2+: CRUD de Projetos, upload/galeria de fotos, comentários, slideshow, sistema de convites, ferramentas de admin + export ZIP, polimento.
+| Fase | Escopo | Status |
+|------|--------|--------|
+| 0 | Fundação (Next.js, Supabase, auth, landing, login) | ✅ |
+| 1 | Schema SQL + bucket `photos` privado + RLS | ✅ |
+| 2 | CRUD de projetos + dashboard | ✅ |
+| 3 | Upload e galeria de fotos (signed URLs) | ✅ |
+| 4 | Comentários + modal de detalhes da foto | ✅ |
+| 5 | Apresentação de slides (teclado, swipe, overlay) | ✅ |
+| 6 | Convites por link seguro + aceite explícito | ✅ |
+| 7 | Admin (moderação, colaboradores, export ZIP) | ✅ |
+| 8 | Polimento, mobile-first, empty states, README | ✅ |
 
-**Após testar o fluxo de login por link mágico localmente e confirmar que o Supabase está conectado, responda e continuaremos com a Fase 2.**
+### Funcionalidades principais
+
+- **Autenticação sem senha** — links mágicos via Supabase Auth
+- **Projetos colaborativos** — papéis: proprietário, colaborador, visualizador, admin
+- **Galeria mobile-first** — busca, badges de comentários, fotos pendentes para o dono
+- **Comentários** — sob cada foto; moderação hierárquica no painel admin
+- **Apresentação** — tela cheia, deslize no celular, legenda/comentários em painel inferior
+- **Convites** — links UUID com validade; aceite explícito após login (não auto-resgate)
+- **Export ZIP** — imagens + `MEMORIES.md` + `memories.json` (limites de taxa e tamanho)
+- **Segurança** — RLS, bucket privado, signed URLs no servidor, políticas endurecidas
 
 ---
 
@@ -343,21 +360,32 @@ on conflict (id) do nothing;
 --   or storage-upload-policy.sql, storage-read-policy.sql, storage-delete-policy.sql
 ```
 
-**Após executar o SQL:**
-- Se a criação de projetos falhar com erro de RLS/recursão, execute também `supabase/fix-rls-recursion.sql` no SQL Editor (corrige políticas antigas já aplicadas).
-- Para storage do bucket `photos`, execute `supabase/storage-policies.sql` (recomendado) ou os arquivos `storage-upload-policy.sql`, `storage-read-policy.sql` e `storage-delete-policy.sql`.
-- Vá em Storage → verifique que o bucket `photos` foi criado como **private** (não público). Se o insert não rodou, crie manualmente como private.
-- **Nunca** use URLs públicas diretas do storage (`/object/public/photos/...`) para fotos de família. Sempre gere signed URLs no servidor para usuários autorizados (veja comentários no SQL acima e implemente em server actions/components na Fase 3+).
-- As RLS + policies acima são abrangentes.
+**Após executar o SQL acima**, rode os scripts adicionais em `supabase/` nesta ordem (SQL Editor):
+
+1. `fix-rls-recursion.sql` — se projetos falharem por recursão RLS (instalações antigas)
+2. `profile-display-name.sql` — nomes de exibição amigáveis nos comentários
+3. `storage-policies.sql` — políticas completas do bucket `photos` (ou os arquivos separados abaixo)
+4. `storage-approved-select-policy.sql` — leitores só veem fotos aprovadas no storage
+5. `comments-approved-policy.sql` — comentários só em fotos aprovadas (não-donos)
+6. `comments-mutate-policies.sql` + `comments-owner-delete-policy.sql` — edição/remoção de comentários
+7. `project-invites-revoke-anon-select.sql` — remove SELECT anônimo amplo em convites
+
+**Storage (alternativa ao passo 3):** `storage-upload-policy.sql`, `storage-read-policy.sql`, `storage-delete-policy.sql`. Se política SELECT já existir (erro `42710`), execute `storage-reset-select-policy.sql` antes de recriar.
+
+- Vá em Storage → confirme bucket `photos` como **private**
+- **Nunca** use URLs públicas (`/object/public/photos/...`). O app gera signed URLs no servidor com `SUPABASE_SERVICE_ROLE_KEY`
 
 ### 4. Variáveis de Ambiente
 
 Copie `.env.example` → `.env.local` e preencha:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://wqkcmdujshzgzzazjkuh.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_Us9pH4RRE_WhKJHx2NZiKQ_W0tBwqaM
-NEXT_PUBLIC_APP_URL=https://your-production-domain.com   # Importante para links mágicos
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
+NEXT_PUBLIC_APP_URL=http://localhost:3000          # Produção: https://seu-dominio.vercel.app
+
+# Obrigatório para convites, signed URLs de fotos e export ZIP com imagens
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key    # NUNCA exponha ao cliente
 ```
 
 Reinicie o servidor de desenvolvimento depois.
@@ -386,35 +414,44 @@ Para entregabilidade de email em produção, configure um SMTP customizado ou us
 
 ---
 
-## Estrutura do Projeto (Atual - Fase 0)
+## Estrutura do Projeto
 
 ```
 .
 ├── app/
-│   ├── auth/
-│   │   ├── callback/route.ts     # Troca de código do link mágico
-│   │   └── signout/route.ts
-│   ├── dashboard/page.tsx        # Shell protegido (será expandido na Fase 2)
-│   ├── login/page.tsx            # Formulário de link mágico (RHF + Zod)
+│   ├── actions/                  # Server Actions (projetos, fotos, comentários, convites, admin)
+│   ├── api/projects/[id]/export/  # Export ZIP com rate limit
+│   ├── auth/                     # callback + signout
+│   ├── dashboard/                # Lista de projetos do usuário
+│   ├── invite/[token]/           # Aceite de convite
+│   ├── login/                    # Link mágico
 │   ├── projects/
-│   │   ├── new/page.tsx          # Placeholder
+│   │   ├── [id]/                 # Galeria, upload, convites
+│   │   │   ├── admin/            # Moderação + export
+│   │   │   ├── edit/
+│   │   │   └── slideshow/        # Apresentação tela cheia
+│   │   ├── new/
 │   │   └── page.tsx
-│   ├── layout.tsx                # Toaster + TooltipProvider + tema acolhedor
-│   └── page.tsx                  # Landing bonita
+│   ├── globals.css               # Tokens de cor + utilitários (page-container, etc.)
+│   └── page.tsx                  # Landing
 ├── components/
-│   └── ui/                       # shadcn/ui (button, dialog, card, input, sonner, etc.)
+│   ├── admin/                    # Painel de moderação do dono
+│   ├── invites/                  # Geração e aceite de convites
+│   ├── layout/app-shell.tsx      # Header sticky mobile-first
+│   ├── photos/                   # Galeria, upload, slideshow, modal
+│   ├── projects/                 # Cards e formulários
+│   └── ui/                       # shadcn/ui + empty-state
 ├── lib/
-│   ├── supabase/
-│   │   ├── client.ts             # Cliente do browser
-│   │   └── server.ts             # Cliente SSR
-│   ├── types.ts                  # Interfaces TS limpas + placeholders para áudio futuro
-│   ├── database.types.ts         # Stub (gere o real após o schema)
-│   └── utils.ts
-├── middleware.ts                 # Refresh de sessão + redirecionamentos de rotas protegidas
-├── .env.example
-├── components.json
-├── package.json
-└── README.md
+│   ├── admin/                    # Queries e permissões de admin
+│   ├── comments/                 # Queries de comentários
+│   ├── export/                   # ZIP, MEMORIES.md, rate limit
+│   ├── invites/                  # Tokens, redeem, URLs
+│   ├── photos/                   # Upload, signed URLs, validação
+│   ├── projects/                 # CRUD e acesso
+│   └── supabase/                 # client, server, admin
+├── supabase/                     # Migrações SQL incrementais
+├── middleware.ts
+└── .env.example
 ```
 
 ---
@@ -467,27 +504,26 @@ Vercel + Supabase é uma excelente combinação — edge functions, imagens ráp
 
 ---
 
-## Destaques de Segurança (Implementados)
+## Destaques de Segurança
 
-- Todas as rotas sensíveis protegidas por middleware + `getUser()` no lado do servidor.
-- RLS do Supabase é a fonte da verdade.
-- Links mágicos (curta duração).
-- Tokens de convite são UUIDs impossíveis de adivinhar.
-- Nunca commite a service role key.
-- O cliente vê apenas a anon key.
+- Rotas protegidas por middleware + `getUser()` no servidor
+- RLS do Supabase como fonte da verdade; helpers `is_project_*` evitam recursão
+- Bucket `photos` privado; imagens via signed URLs geradas no servidor
+- Convites: aceite explícito (POST), resgate atômico `WHERE redeemed_at IS NULL`
+- Export: limite de fotos/tamanho + rate limit por usuário
+- Comentários em fotos não aprovadas bloqueados para não-donos
+- `project_invites`: SELECT anônimo amplo revogado; lookup por token no servidor
+- Service role key apenas em variáveis de servidor — nunca `NEXT_PUBLIC_`
 
 ---
 
-## Próximos Passos (para a IA / você)
+## Teste rápido (local)
 
-Responda com confirmação de que:
-- `npm run dev` funciona e a landing page aparece
-- Você consegue ver a tela de login (mesmo sem configurar o Supabase ainda — ela mostra instruções)
-- Após configurar .env.local + rodar o SQL do schema + reiniciar, o fluxo de link mágico funciona
-- Você consegue se cadastrar / entrar via link mágico (verifique Supabase dashboard → Authentication → Users)
-- A tabela profiles recebe uma linha automaticamente
-- Então continuaremos com **Fase 2: CRUD de Projetos + painel**
+1. `cp .env.example .env.local` — preencha Supabase + service role
+2. Execute o schema SQL + migrações em `supabase/` (ordem acima)
+3. `npm run dev` → http://localhost:3000
+4. Login com link mágico → criar projeto → upload → convidar → slideshow no celular
 
-Obrigado — vamos construir algo lindo para as famílias.
+**Produção:** https://depoimentos-eight.vercel.app (configure `NEXT_PUBLIC_APP_URL`, desative Vercel Deployment Protection, alinhe Redirect URLs no Supabase).
 
-Construído seguindo as instruções completas em `project-instructions.md`.
+Construído seguindo `project-instructions.md`.

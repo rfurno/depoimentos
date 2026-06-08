@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState, useTransition } from 'reac
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { Copy, Link2, Loader2, Trash2, UserPlus } from 'lucide-react'
+import { Copy, Link2, Loader2, Mail, Trash2, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   createProjectInvite,
@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { EmptyState } from '@/components/ui/empty-state'
 
 const initialState: InviteActionState = {}
 
@@ -221,9 +222,13 @@ export function ProjectInvitesPanel({
         )}
 
         {invites.length === 0 && (
-          <p className="text-sm text-muted-foreground italic">
-            Nenhum convite ainda. Gere um link e envie por WhatsApp ou e-mail.
-          </p>
+          <EmptyState
+            icon={Mail}
+            title="Nenhum convite ainda"
+            description="Gere um link seguro acima e envie por WhatsApp, e-mail ou mensagem para parentes entrarem no projeto."
+            compact
+            className="border-dashed bg-muted/30 shadow-none"
+          />
         )}
       </CardContent>
     </Card>

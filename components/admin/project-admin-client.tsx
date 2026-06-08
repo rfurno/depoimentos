@@ -9,11 +9,13 @@ import {
   ChevronDown,
   ChevronRight,
   Download,
+  Images,
   Loader2,
   MessageCircle,
   Shield,
   Trash2,
   UserMinus,
+  Users,
   X,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -44,6 +46,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { EmptyState } from '@/components/ui/empty-state'
 
 const ROLES: CollaboratorRole[] = ['contributor', 'viewer', 'admin']
 
@@ -230,7 +233,13 @@ export function ProjectAdminClient({
             />
           ))}
           {photos.length === 0 && (
-            <p className="text-sm text-muted-foreground italic">Nenhuma foto neste projeto.</p>
+            <EmptyState
+              icon={Images}
+              title="Nenhuma foto neste projeto"
+              description="Quando colaboradores enviarem fotos, você poderá moderá-las, editar metadados e exportar memórias daqui."
+              compact
+              className="border-dashed"
+            />
           )}
         </div>
       </section>
@@ -286,7 +295,13 @@ export function ProjectAdminClient({
             </li>
           ))}
           {collaborators.length === 0 && (
-            <p className="text-sm text-muted-foreground italic">Nenhum colaborador ainda — use convites na página do projeto.</p>
+            <EmptyState
+              icon={Users}
+              title="Nenhum colaborador ainda"
+              description="Convide parentes na página do projeto. Eles entram com link mágico e aparecem aqui automaticamente."
+              compact
+              className="border-dashed"
+            />
           )}
         </ul>
       </section>

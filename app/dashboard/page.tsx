@@ -1,8 +1,9 @@
 import Link from 'next/link'
-import { Plus, Image as ImageIcon } from 'lucide-react'
+import { Plus, FolderOpen } from 'lucide-react'
 import { AppShell } from '@/components/layout/app-shell'
 import { ProjectCard } from '@/components/projects/project-card'
 import { buttonVariants } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui/empty-state'
 import { requireUser } from '@/lib/auth/server'
 import { getDisplayName, getProjectsForUser } from '@/lib/projects/queries'
 
@@ -17,10 +18,10 @@ export default async function DashboardPage() {
 
   return (
     <AppShell displayName={displayName}>
-      <main className="mx-auto max-w-5xl px-6 py-12">
+      <main className="page-container">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-4xl tracking-tighter font-semibold">Seus projetos</h1>
+            <h1 className="text-3xl sm:text-4xl tracking-tighter font-semibold">Seus projetos</h1>
             <p className="text-muted-foreground mt-1">
               Bem-vindo de volta, {displayName}. Suas histórias de família vivem aqui.
             </p>
@@ -36,25 +37,21 @@ export default async function DashboardPage() {
         </div>
 
         {projects.length === 0 ? (
-          <div className="card-elevated rounded-2xl border p-16 text-center">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl icon-tile">
-              <ImageIcon className="h-8 w-8 icon-brand" />
-            </div>
-            <h3 className="text-2xl tracking-tight font-semibold mb-2">Nenhum projeto ainda</h3>
-            <p className="text-muted-foreground max-w-sm mx-auto mb-8">
-              Crie seu primeiro projeto de história familiar. Na Fase 3 você poderá adicionar fotos
-              e legendas.
-            </p>
+          <EmptyState
+            icon={FolderOpen}
+            title="Nenhum projeto ainda"
+            description="Crie seu primeiro projeto de história familiar. Depois adicione fotos, convide parentes e preserve memórias juntos."
+          >
             <Link
               href="/projects/new"
               className={buttonVariants({
                 size: 'lg',
-                className: 'rounded-full px-8 btn-primary-gradient font-semibold',
+                className: 'rounded-full px-8 btn-primary-gradient font-semibold w-full sm:w-auto',
               })}
             >
               Criar seu primeiro projeto
             </Link>
-          </div>
+          </EmptyState>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {projects.map((project) => (
@@ -63,9 +60,6 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        <div className="mt-12 text-xs text-center text-muted-foreground">
-          Sessão ativa
-        </div>
       </main>
     </AppShell>
   )

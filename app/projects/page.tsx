@@ -1,8 +1,9 @@
 import Link from 'next/link'
-import { Plus } from 'lucide-react'
+import { Plus, FolderOpen } from 'lucide-react'
 import { AppShell } from '@/components/layout/app-shell'
 import { ProjectCard } from '@/components/projects/project-card'
 import { buttonVariants } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui/empty-state'
 import { requireUser } from '@/lib/auth/server'
 import { getDisplayName, getProjectsForUser } from '@/lib/projects/queries'
 
@@ -17,7 +18,7 @@ export default async function ProjectsPage() {
 
   return (
     <AppShell displayName={displayName}>
-      <main className="mx-auto max-w-5xl px-6 py-12">
+      <main className="page-container">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl tracking-tight font-semibold">Todos os projetos</h1>
@@ -36,12 +37,22 @@ export default async function ProjectsPage() {
         </div>
 
         {projects.length === 0 ? (
-          <p className="text-muted-foreground text-center py-12">
-            Nenhum projeto encontrado.{' '}
-            <Link href="/projects/new" className="link-brand underline">
-              Criar um agora
+          <EmptyState
+            icon={FolderOpen}
+            title="Nenhum projeto encontrado"
+            description="Projetos que você criar ou nos quais colaborar aparecerão aqui."
+            compact
+          >
+            <Link
+              href="/projects/new"
+              className={buttonVariants({
+                className: 'rounded-full btn-primary-gradient font-semibold w-full sm:w-auto',
+              })}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Criar projeto
             </Link>
-          </p>
+          </EmptyState>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {projects.map((project) => (

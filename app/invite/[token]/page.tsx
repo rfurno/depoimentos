@@ -73,7 +73,7 @@ export default async function InvitePage({ params }: PageProps) {
   return (
     <div className="min-h-screen hero-gradient flex flex-col">
       <header className="border-b border-border/60 bg-background/90 backdrop-blur-sm">
-        <div className="mx-auto max-w-lg px-6 py-5 flex items-center justify-between">
+        <div className="mx-auto max-w-lg px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between">
           <Link href="/" className="font-semibold tracking-tight text-xl text-foreground">
             Storyloom
           </Link>
@@ -89,7 +89,7 @@ export default async function InvitePage({ params }: PageProps) {
         </div>
       </header>
 
-      <main className="flex-1 flex items-center justify-center px-6 py-12">
+      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
         <Card className="w-full max-w-md card-elevated border rounded-2xl">
           <CardHeader className="text-center pb-4">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted">

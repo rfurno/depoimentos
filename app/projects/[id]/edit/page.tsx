@@ -32,7 +32,7 @@ export default async function EditProjectPage({ params }: PageProps) {
 
   return (
     <AppShell displayName={displayName}>
-      <main className="mx-auto max-w-5xl px-6 py-12">
+      <main className="page-container">
         <Link
           href={`/projects/${project.id}`}
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8"

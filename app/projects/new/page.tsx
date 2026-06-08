@@ -11,7 +11,7 @@ export default async function NewProjectPage() {
 
   return (
     <AppShell displayName={displayName}>
-      <main className="mx-auto max-w-5xl px-6 py-12 flex justify-center">
+      <main className="page-container flex justify-center">
         <ProjectForm mode="create" />
       </main>
     </AppShell>
