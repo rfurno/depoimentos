@@ -25,7 +25,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl icon-tile transition group-hover:scale-105">
           <FolderOpen className="h-5 w-5" />
         </div>
-        <Badge variant="secondary" className="bg-bg-subtle text-text-secondary border-0">
+        <Badge variant="secondary" className="bg-muted text-text-secondary border-0">
           {roleLabel(project.role)}
         </Badge>
       </div>

@@ -107,7 +107,7 @@ export function ProjectInvitesPanel({
 
         <form
           action={formAction}
-          className="space-y-4 rounded-xl border border-border bg-bg-subtle p-4"
+          className="space-y-4 rounded-xl border border-border bg-muted p-4"
         >
           {state.error && (
             <p className="text-sm text-destructive rounded-xl bg-destructive/10 px-3 py-2 border border-destructive/20">
@@ -251,7 +251,7 @@ function InviteListItem({
     <li className="flex flex-col gap-2 rounded-xl border border-border bg-card px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 space-y-1">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="secondary" className="bg-bg-subtle text-text-secondary border-0 text-xs">
+          <Badge variant="secondary" className="bg-muted text-text-secondary border-0 text-xs">
             {inviteRoleShortLabel(invite.role)}
           </Badge>
           {isActive ? (
