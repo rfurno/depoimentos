@@ -43,7 +43,7 @@ export function DeleteProjectButton({ projectId, projectTitle }: DeleteProjectBu
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium h-8 px-3 border text-[#b85c38] border-[#b85c38]/30 hover:bg-[#fdf2ef] bg-transparent cursor-pointer"
+        className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium h-8 px-3 border text-destructive border-destructive/30 hover:bg-destructive/10 bg-transparent cursor-pointer"
       >
         <Trash2 className="h-4 w-4" />
         Excluir
@@ -52,7 +52,7 @@ export function DeleteProjectButton({ projectId, projectTitle }: DeleteProjectBu
         <DialogHeader>
           <DialogTitle>Excluir projeto?</DialogTitle>
           <DialogDescription>
-            <strong className="text-[#2c2522]">{projectTitle}</strong> e todas as fotos e
+            <strong className="text-foreground">{projectTitle}</strong> e todas as fotos e
             comentários associados serão removidos permanentemente. Esta ação não pode ser desfeita.
           </DialogDescription>
         </DialogHeader>
@@ -64,7 +64,7 @@ export function DeleteProjectButton({ projectId, projectTitle }: DeleteProjectBu
             variant="destructive"
             onClick={handleDelete}
             disabled={isPending}
-            className="bg-[#b85c38] hover:bg-[#9a4d2f]"
+            className="bg-destructive hover:bg-primary-dark"
           >
             {isPending ? (
               <>

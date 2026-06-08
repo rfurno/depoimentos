@@ -39,6 +39,13 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-primary-dark: var(--color-primary-dark);
+  --color-primary-light: var(--color-primary-light);
+  --color-brand-secondary: var(--color-secondary);
+  --color-brand-secondary-dark: var(--color-secondary-dark);
+  --color-surface: var(--color-surface);
+  --color-success: var(--color-success);
+  --color-story-dark: var(--story-dark);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -49,74 +56,92 @@
 }
 
 :root {
-  /* Warm, inviting, premium family-heritage palette */
-  --background: #f8f5f2; /* soft cream */
-  --foreground: #2c2522; /* warm dark brown-gray */
-  --card: #ffffff;
-  --card-foreground: #2c2522;
-  --popover: #ffffff;
-  --popover-foreground: #2c2522;
-  --primary: #8b5e3c; /* warm terracotta / saddle brown */
-  --primary-foreground: #fdfaf5;
-  --secondary: #e8e0d5; /* warm gray-beige */
-  --secondary-foreground: #2c2522;
-  --muted: #f0e9df;
-  --muted-foreground: #6b6057;
-  --accent: #5c6b4e; /* subtle forest green */
-  --accent-foreground: #fdfaf5;
-  --destructive: #b85c38;
-  --border: #d9d0c3;
-  --input: #f0e9df;
-  --ring: #8b5e3c;
-  --chart-1: #8b5e3c;
-  --chart-2: #5c6b4e;
-  --chart-3: #a67c52;
-  --chart-4: #c89f6d;
-  --chart-5: #6b6057;
+  /* Brand palette */
+  --color-primary: #ff6b4a;
+  --color-primary-dark: #e05d3f;
+  --color-primary-light: #ff8a6f;
+  --color-secondary: #14b8a6;
+  --color-secondary-dark: #0f9e8e;
+  --color-accent: #f9c74f;
+  --color-accent-dark: #f4a261;
+  --color-background: #faf5f0;
+  --color-surface: #ffffff;
+  --color-card: #ffffff;
+  --color-text-primary: #3f2a1e;
+  --color-text-secondary: #5c4637;
+  --color-text-muted: #8c6f5e;
+  --color-success: #34d399;
+  --color-border: #ede4d9;
+
+  /* shadcn semantic tokens */
+  --background: var(--color-background);
+  --foreground: var(--color-text-primary);
+  --card: var(--color-card);
+  --card-foreground: var(--color-text-primary);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-text-primary);
+  --primary: var(--color-primary);
+  --primary-foreground: #ffffff;
+  --secondary: #e0f7f4;
+  --secondary-foreground: var(--color-secondary-dark);
+  --muted: #f5ede6;
+  --muted-foreground: var(--color-text-muted);
+  --accent: var(--color-accent);
+  --accent-foreground: var(--color-text-primary);
+  --destructive: var(--color-primary-dark);
+  --border: var(--color-border);
+  --input: #f5ede6;
+  --ring: var(--color-primary);
+  --chart-1: var(--color-primary);
+  --chart-2: var(--color-secondary);
+  --chart-3: var(--color-accent);
+  --chart-4: var(--color-accent-dark);
+  --chart-5: var(--color-text-muted);
   --radius: 0.625rem;
-  --sidebar: #f8f5f2;
-  --sidebar-foreground: #2c2522;
-  --sidebar-primary: #8b5e3c;
-  --sidebar-primary-foreground: #fdfaf5;
-  --sidebar-accent: #e8e0d5;
-  --sidebar-accent-foreground: #2c2522;
-  --sidebar-border: #d9d0c3;
-  --sidebar-ring: #8b5e3c;
+  --story-dark: #2a1f18;
+  --sidebar: var(--color-background);
+  --sidebar-foreground: var(--color-text-primary);
+  --sidebar-primary: var(--color-primary);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e0f7f4;
+  --sidebar-accent-foreground: var(--color-text-primary);
+  --sidebar-border: var(--color-border);
+  --sidebar-ring: var(--color-primary);
 }
 
 .dark {
-  /* Warm dark mode - still heritage feeling */
-  --background: #1f1a17;
-  --foreground: #f5f0e8;
-  --card: #2c2522;
-  --card-foreground: #f5f0e8;
-  --popover: #2c2522;
-  --popover-foreground: #f5f0e8;
-  --primary: #c89f6d; /* warm terracotta accent in dark */
-  --primary-foreground: #1f1a17;
-  --secondary: #3a312b;
-  --secondary-foreground: #f5f0e8;
-  --muted: #3a312b;
-  --muted-foreground: #a89a8c;
-  --accent: #8a9a72; /* muted forest */
-  --accent-foreground: #1f1a17;
-  --destructive: #d17a5e;
-  --border: #4a4139;
-  --input: #3a312b;
-  --ring: #c89f6d;
-  --chart-1: #c89f6d;
-  --chart-2: #8a9a72;
-  --chart-3: #a67c52;
-  --chart-4: #d4b48c;
-  --chart-5: #a89a8c;
-  --sidebar: #1f1a17;
-  --sidebar-foreground: #f5f0e8;
-  --sidebar-primary: #c89f6d;
-  --sidebar-primary-foreground: #1f1a17;
-  --sidebar-accent: #3a312b;
-  --sidebar-accent-foreground: #f5f0e8;
-  --sidebar-border: #4a4139;
-  --sidebar-ring: #c89f6d;
+  --background: #2a1f18;
+  --foreground: #faf5f0;
+  --card: #3f2a1e;
+  --card-foreground: #faf5f0;
+  --popover: #3f2a1e;
+  --popover-foreground: #faf5f0;
+  --primary: var(--color-primary-light);
+  --primary-foreground: #2a1f18;
+  --secondary: #1a4a44;
+  --secondary-foreground: #a7f3ec;
+  --muted: #3f2a1e;
+  --muted-foreground: #c4a894;
+  --accent: var(--color-accent);
+  --accent-foreground: #2a1f18;
+  --destructive: #ff8a6f;
+  --border: #5c4637;
+  --input: #3f2a1e;
+  --ring: var(--color-primary-light);
+  --chart-1: var(--color-primary-light);
+  --chart-2: var(--color-secondary);
+  --chart-3: var(--color-accent);
+  --chart-4: var(--color-accent-dark);
+  --chart-5: #c4a894;
+  --story-dark: #1f1814;
+  --sidebar: #2a1f18;
+  --sidebar-foreground: #faf5f0;
+  --sidebar-primary: var(--color-primary-light);
+  --sidebar-primary-foreground: #2a1f18;
+  --sidebar-accent: #3f2a1e;
+  --sidebar-accent-foreground: #faf5f0;
+  --sidebar-border: #5c4637;
+  --sidebar-ring: var(--color-primary-light);
 }
 
 @layer base {
@@ -130,10 +155,9 @@
     @apply font-sans;
   }
 
-  /* Storyloom custom: premium family feel */
   .story-card {
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
-                box-shadow 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .story-card:hover {
     transform: translateY(-1px);

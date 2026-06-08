@@ -25,12 +25,12 @@ export function InviteAcceptForm({ token }: InviteAcceptFormProps) {
 
   return (
     <form action={formAction} className="space-y-3 pt-2">
-      <p className="text-sm text-center text-[#6b6057]">
+      <p className="text-sm text-center text-muted-foreground">
         Ao aceitar, você passará a ver e participar deste projeto conforme o papel do convite.
       </p>
 
       {state.error && (
-        <p className="text-sm rounded-lg px-4 py-3 border text-[#b85c38] bg-[#fdf2ef] border-[#b85c38]/20">
+        <p className="text-sm rounded-lg px-4 py-3 border text-destructive bg-destructive/10 border-destructive/20">
           {state.error}
         </p>
       )}
@@ -40,7 +40,7 @@ export function InviteAcceptForm({ token }: InviteAcceptFormProps) {
         disabled={pending}
         className={buttonVariants({
           className:
-            'w-full h-12 rounded-full bg-[#8b5e3c] hover:bg-[#6f4a30] text-base disabled:opacity-60',
+            'w-full h-12 rounded-full bg-primary hover:bg-primary-dark text-base disabled:opacity-60',
         })}
       >
         {pending ? (

@@ -236,10 +236,10 @@ export function PhotoSlideshow({
   if (photos.length === 0) {
     if (mode === 'standalone') {
       return (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#1a1614] text-white p-6">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-story-dark text-white p-6">
           <p className="text-lg mb-4">Nenhuma foto para exibir na apresentação.</p>
           {backHref ? (
-            <Link href={backHref} className="text-[#d4b896] hover:underline text-sm">
+            <Link href={backHref} className="text-accent hover:underline text-sm">
               Voltar ao projeto
             </Link>
           ) : (
@@ -257,7 +257,7 @@ export function PhotoSlideshow({
 
   const content = (
     <div
-      className="fixed inset-0 z-[100] flex flex-col bg-[#1a1614] text-white touch-pan-y"
+      className="fixed inset-0 z-[100] flex flex-col bg-story-dark text-white touch-pan-y"
       role="dialog"
       aria-modal="true"
       aria-label={`Apresentação: ${projectTitle}`}
@@ -388,7 +388,7 @@ export function PhotoSlideshow({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative z-30 shrink-0 border-t border-white/10 bg-[#2c2522]/95 backdrop-blur-md px-4 py-4 sm:px-6 max-h-[50vh]"
+            className="relative z-30 shrink-0 border-t border-white/10 bg-foreground/95 backdrop-blur-md px-4 py-4 sm:px-6 max-h-[50vh]"
           >
             <SlideInfoPanel
               photo={currentPhoto}

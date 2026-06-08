@@ -84,23 +84,23 @@ export function LoginForm() {
 
   if (isConfigError) {
     return (
-      <Card className="border-[#b85c38] shadow-sm bg-[#fdf2ef]">
+      <Card className="border-destructive shadow-sm bg-destructive/10">
         <CardHeader className="text-center pb-4">
-          <CardTitle className="text-2xl tracking-tight text-[#b85c38]">Configuração necessária</CardTitle>
-          <CardDescription className="text-base pt-2 text-[#6b6057]">
+          <CardTitle className="text-2xl tracking-tight text-destructive">Configuração necessária</CardTitle>
+          <CardDescription className="text-base pt-2 text-muted-foreground">
             O Storyloom precisa de um projeto Supabase para funcionar.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4 text-sm text-[#2c2522]">
+        <CardContent className="space-y-4 text-sm text-foreground">
           <ol className="list-decimal pl-5 space-y-2">
-            <li>Copie o arquivo <code className="bg-white px-1 rounded">.env.example</code> para <code className="bg-white px-1 rounded">.env.local</code></li>
-            <li>Crie um projeto gratuito em <a href="https://supabase.com" target="_blank" className="underline text-[#8b5e3c]">supabase.com</a></li>
+            <li>Copie o arquivo <code className="bg-card px-1 rounded">.env.example</code> para <code className="bg-card px-1 rounded">.env.local</code></li>
+            <li>Crie um projeto gratuito em <a href="https://supabase.com" target="_blank" className="underline text-primary">supabase.com</a></li>
             <li>Copie a <strong>Project URL</strong> e a <strong>anon public key</strong> do seu projeto (em Settings → API)</li>
-            <li>Cole os valores em <code className="bg-white px-1 rounded">.env.local</code></li>
-            <li>Execute o SQL do schema que está no <code className="bg-white px-1 rounded">README.md</code></li>
-            <li>Reinicie o servidor de desenvolvimento (<code className="bg-white px-1 rounded">npm run dev</code>)</li>
+            <li>Cole os valores em <code className="bg-card px-1 rounded">.env.local</code></li>
+            <li>Execute o SQL do schema que está no <code className="bg-card px-1 rounded">README.md</code></li>
+            <li>Reinicie o servidor de desenvolvimento (<code className="bg-card px-1 rounded">npm run dev</code>)</li>
           </ol>
-          <p className="pt-2 text-xs text-[#6b6057]">
+          <p className="pt-2 text-xs text-muted-foreground">
             Depois de configurar, volte aqui e tente entrar com seu e-mail.
           </p>
           <div className="pt-4">
@@ -117,18 +117,18 @@ export function LoginForm() {
 
   if (emailSent) {
     return (
-      <Card className="border-[#d9d0c3] shadow-sm">
+      <Card className="border-border shadow-sm">
         <CardHeader className="text-center pb-4">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#e8e0d5]">
-            <CheckCircle className="h-7 w-7 text-[#8b5e3c]" />
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+            <CheckCircle className="h-7 w-7 text-primary" />
           </div>
           <CardTitle className="text-2xl tracking-tight">Verifique seu e-mail</CardTitle>
           <CardDescription className="text-base pt-2">
             Enviamos um link mágico para<br />
-            <span className="font-medium text-[#2c2522]">{sentTo}</span>
+            <span className="font-medium text-foreground">{sentTo}</span>
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4 text-center text-sm text-[#6b6057]">
+        <CardContent className="space-y-4 text-center text-sm text-muted-foreground">
           <p>Clique no link do e-mail para entrar. Ele expira em alguns minutos por segurança.</p>
           <p>
             Não recebeu? Verifique o spam, ou{" "}
@@ -137,7 +137,7 @@ export function LoginForm() {
                 setEmailSent(false);
                 form.reset({ email: sentTo });
               }}
-              className="text-[#8b5e3c] underline hover:no-underline font-medium"
+              className="text-primary underline hover:no-underline font-medium"
             >
               tente novamente
             </button>
@@ -145,7 +145,7 @@ export function LoginForm() {
           </p>
           <div className="pt-4">
             <Link href="/">
-              <Button variant="ghost" className="text-[#6b6057]">
+              <Button variant="ghost" className="text-muted-foreground">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Voltar ao início
               </Button>
             </Link>
@@ -156,7 +156,7 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="border-[#d9d0c3] shadow-sm">
+    <Card className="border-border shadow-sm">
       <CardHeader className="space-y-1 pb-6">
         <CardTitle className="text-3xl tracking-tighter">Bem-vindo de volta</CardTitle>
         <CardDescription className="text-base">
@@ -165,7 +165,7 @@ export function LoginForm() {
       </CardHeader>
       <CardContent>
         {errorParam && (
-          <Alert variant="destructive" className="mb-6 border-[#b85c38]/30 bg-[#fdf2ef]">
+          <Alert variant="destructive" className="mb-6 border-destructive/30 bg-destructive/10">
             <AlertDescription>
               Falha na autenticação. Por favor, solicite um novo link mágico.
             </AlertDescription>
@@ -178,20 +178,20 @@ export function LoginForm() {
               id="email"
               type="email"
               placeholder="voce@familia.com"
-              className="h-12 bg-white border-[#d9d0c3] text-base"
+              className="h-12 bg-card border-border text-base"
               {...form.register("email")}
               disabled={isLoading}
               autoComplete="email"
               autoFocus
             />
             {form.formState.errors.email && (
-              <p className="text-sm text-[#b85c38]">{form.formState.errors.email.message}</p>
+              <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
             )}
           </div>
 
           <Button
             type="submit"
-            className="w-full h-12 text-base rounded-full bg-[#8b5e3c] hover:bg-[#6f4a30] disabled:opacity-70"
+            className="w-full h-12 text-base rounded-full bg-primary hover:bg-primary-dark disabled:opacity-70"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -207,7 +207,7 @@ export function LoginForm() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-xs text-[#6b6057]">
+          <p className="text-xs text-muted-foreground">
             Ao continuar, você concorda em manter as histórias da família privadas e respeitosas.
           </p>
         </div>

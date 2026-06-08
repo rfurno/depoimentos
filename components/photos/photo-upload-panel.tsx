@@ -106,19 +106,19 @@ export function PhotoUploadPanel({ projectId }: PhotoUploadPanelProps) {
   }
 
   return (
-    <Card className="border-[#d9d0c3] shadow-sm">
+    <Card className="border-border shadow-sm">
       <CardHeader>
         <CardTitle className="text-xl tracking-tight flex items-center gap-2">
-          <ImagePlus className="h-5 w-5 text-[#8b5e3c]" />
+          <ImagePlus className="h-5 w-5 text-primary" />
           Adicionar fotos
         </CardTitle>
-        <CardDescription className="text-[#6b6057]">
+        <CardDescription className="text-muted-foreground">
           Envie uma ou várias imagens. Título, legenda e história são opcionais para cada foto.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {state.error && (
-          <p className="text-sm text-[#b85c38] rounded-lg bg-[#fdf2ef] px-3 py-2 border border-[#b85c38]/20">
+          <p className="text-sm text-destructive rounded-lg bg-destructive/10 px-3 py-2 border border-destructive/20">
             {state.error}
           </p>
         )}
@@ -136,7 +136,7 @@ export function PhotoUploadPanel({ projectId }: PhotoUploadPanelProps) {
         <Button
           type="button"
           variant="outline"
-          className="w-full border-dashed border-[#d9d0c3] h-12"
+          className="w-full border-dashed border-border h-12"
           onClick={() => inputRef.current?.click()}
           disabled={isUploading || pending.length >= MAX_PHOTOS_PER_UPLOAD}
         >
@@ -150,23 +150,23 @@ export function PhotoUploadPanel({ projectId }: PhotoUploadPanelProps) {
               {pending.map((item, index) => (
                 <li
                   key={item.id}
-                  className="flex gap-4 rounded-xl border border-[#d9d0c3] bg-[#faf8f6] p-3"
+                  className="flex gap-4 rounded-xl border border-border bg-background p-3"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element -- blob preview */}
                   <img
                     src={item.preview}
                     alt=""
-                    className="h-20 w-20 shrink-0 rounded-lg object-cover bg-[#e8e0d5]"
+                    className="h-20 w-20 shrink-0 rounded-lg object-cover bg-muted"
                   />
                   <div className="flex-1 min-w-0 space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-medium text-[#6b6057] truncate">
+                      <span className="text-xs font-medium text-muted-foreground truncate">
                         Foto {index + 1}: {item.file.name}
                       </span>
                       <button
                         type="button"
                         onClick={() => removePending(item.id)}
-                        className="text-[#6b6057] hover:text-[#b85c38] p-1"
+                        className="text-muted-foreground hover:text-destructive p-1"
                         aria-label="Remover"
                       >
                         <X className="h-4 w-4" />
@@ -179,7 +179,7 @@ export function PhotoUploadPanel({ projectId }: PhotoUploadPanelProps) {
                           value={item.title}
                           onChange={(e) => updatePending(item.id, 'title', e.target.value)}
                           placeholder="Opcional"
-                          className="h-8 text-sm bg-white"
+                          className="h-8 text-sm bg-card"
                           maxLength={200}
                           disabled={isUploading}
                         />
@@ -190,7 +190,7 @@ export function PhotoUploadPanel({ projectId }: PhotoUploadPanelProps) {
                           value={item.caption}
                           onChange={(e) => updatePending(item.id, 'caption', e.target.value)}
                           placeholder="Opcional"
-                          className="h-8 text-sm bg-white"
+                          className="h-8 text-sm bg-card"
                           maxLength={500}
                           disabled={isUploading}
                         />
@@ -202,7 +202,7 @@ export function PhotoUploadPanel({ projectId }: PhotoUploadPanelProps) {
                         value={item.story}
                         onChange={(e) => updatePending(item.id, 'story', e.target.value)}
                         placeholder="O que esta foto significa para você?"
-                        className="min-h-[60px] text-sm bg-white resize-y"
+                        className="min-h-[60px] text-sm bg-card resize-y"
                         maxLength={5000}
                         disabled={isUploading}
                       />
@@ -215,7 +215,7 @@ export function PhotoUploadPanel({ projectId }: PhotoUploadPanelProps) {
             <Button
               type="submit"
               disabled={isUploading}
-              className="w-full rounded-full bg-[#8b5e3c] hover:bg-[#6f4a30] text-white"
+              className="w-full rounded-full bg-primary hover:bg-primary-dark text-white"
             >
               {isUploading ? (
                 <>

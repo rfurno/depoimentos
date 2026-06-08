@@ -21,14 +21,14 @@ export default async function DashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
             <h1 className="text-4xl tracking-tighter font-semibold">Seus projetos</h1>
-            <p className="text-[#6b6057] mt-1">
+            <p className="text-muted-foreground mt-1">
               Bem-vindo de volta, {displayName}. Suas histórias de família vivem aqui.
             </p>
           </div>
           <Link
             href="/projects/new"
             className={buttonVariants({
-              className: 'rounded-full bg-[#8b5e3c] hover:bg-[#6f4a30] px-5 text-white shrink-0',
+              className: 'rounded-full bg-primary hover:bg-primary-dark px-5 text-white shrink-0',
             })}
           >
             <Plus className="mr-2 h-4 w-4" /> Novo Projeto
@@ -36,12 +36,12 @@ export default async function DashboardPage() {
         </div>
 
         {projects.length === 0 ? (
-          <div className="rounded-2xl border border-[#d9d0c3] bg-white p-16 text-center">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#f0e9df]">
-              <ImageIcon className="h-8 w-8 text-[#8b5e3c]" />
+          <div className="rounded-2xl border border-border bg-card p-16 text-center">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+              <ImageIcon className="h-8 w-8 text-primary" />
             </div>
             <h3 className="text-2xl tracking-tight font-semibold mb-2">Nenhum projeto ainda</h3>
-            <p className="text-[#6b6057] max-w-sm mx-auto mb-8">
+            <p className="text-muted-foreground max-w-sm mx-auto mb-8">
               Crie seu primeiro projeto de história familiar. Na Fase 3 você poderá adicionar fotos
               e legendas.
             </p>
@@ -49,7 +49,7 @@ export default async function DashboardPage() {
               href="/projects/new"
               className={buttonVariants({
                 size: 'lg',
-                className: 'rounded-full px-8 bg-[#8b5e3c] hover:bg-[#6f4a30] text-white',
+                className: 'rounded-full px-8 bg-primary hover:bg-primary-dark text-white',
               })}
             >
               Criar seu primeiro projeto
@@ -63,7 +63,7 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        <div className="mt-12 text-xs text-center text-[#6b6057]">
+        <div className="mt-12 text-xs text-center text-muted-foreground">
           Sessão ativa
         </div>
       </main>

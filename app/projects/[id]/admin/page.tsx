@@ -46,7 +46,7 @@ export default async function ProjectAdminPage({ params }: PageProps) {
       <main className="mx-auto max-w-5xl px-6 py-12">
         <Link
           href={`/projects/${project.id}`}
-          className="inline-flex items-center text-sm text-[#6b6057] hover:text-[#2c2522] mb-6"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar ao projeto
@@ -54,14 +54,14 @@ export default async function ProjectAdminPage({ params }: PageProps) {
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
-            <div className="flex items-center gap-2 text-[#8b5e3c] mb-1">
+            <div className="flex items-center gap-2 text-primary mb-1">
               <Settings className="h-5 w-5" />
               <span className="text-sm font-medium">Administração</span>
             </div>
-            <h1 className="text-3xl tracking-tighter font-semibold text-[#2c2522]">
+            <h1 className="text-3xl tracking-tighter font-semibold text-foreground">
               {project.title}
             </h1>
-            <p className="text-[#6b6057] mt-1">
+            <p className="text-muted-foreground mt-1">
               Modere fotos e comentários, gerencie colaboradores e exporte memórias.
             </p>
           </div>

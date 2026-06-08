@@ -32,7 +32,7 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#f8f5f2]">
+      <body className="min-h-full flex flex-col bg-background">
         <TooltipProvider>
           {children}
           <Toaster position="top-center" richColors closeButton />

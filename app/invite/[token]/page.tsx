@@ -71,18 +71,18 @@ export default async function InvitePage({ params }: PageProps) {
   const showLoginCta = !user && preview.canRedeem
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] flex flex-col">
-      <header className="border-b border-[#d9d0c3]/60 bg-[#faf8f5]/90 backdrop-blur-sm">
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="border-b border-border/60 bg-background/90 backdrop-blur-sm">
         <div className="mx-auto max-w-lg px-6 py-5 flex items-center justify-between">
-          <Link href="/" className="font-semibold tracking-tight text-xl text-[#2c2522]">
+          <Link href="/" className="font-semibold tracking-tight text-xl text-foreground">
             Storyloom
           </Link>
           {user ? (
-            <Link href="/dashboard" className="text-sm text-[#6b6057] hover:text-[#2c2522]">
+            <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
               Meus projetos
             </Link>
           ) : (
-            <Link href="/login" className="text-sm text-[#6b6057] hover:text-[#2c2522]">
+            <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
               Entrar
             </Link>
           )}
@@ -90,31 +90,31 @@ export default async function InvitePage({ params }: PageProps) {
       </header>
 
       <main className="flex-1 flex items-center justify-center px-6 py-12">
-        <Card className="w-full max-w-md border-[#d9d0c3] shadow-sm">
+        <Card className="w-full max-w-md border-border shadow-sm">
           <CardHeader className="text-center pb-4">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#e8e0d5]">
-              <Users className="h-7 w-7 text-[#8b5e3c]" />
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+              <Users className="h-7 w-7 text-primary" />
             </div>
             <CardTitle className="text-2xl tracking-tight">Convite para colaborar</CardTitle>
-            <CardDescription className="text-base pt-2 text-[#6b6057]">
+            <CardDescription className="text-base pt-2 text-muted-foreground">
               Você foi convidado(a) para participar de
             </CardDescription>
-            <p className="text-xl font-semibold text-[#2c2522] pt-1">{preview.projectTitle}</p>
+            <p className="text-xl font-semibold text-foreground pt-1">{preview.projectTitle}</p>
           </CardHeader>
 
           <CardContent className="space-y-5">
             <div className="flex flex-wrap justify-center gap-2">
-              <Badge variant="secondary" className="bg-[#f0e9df] text-[#6b6057] border-0">
+              <Badge variant="secondary" className="bg-muted text-muted-foreground border-0">
                 {inviteRoleShortLabel(preview.role)}
               </Badge>
-              <span className="text-xs text-[#6b6057] self-center">Válido até {expiresLabel}</span>
+              <span className="text-xs text-muted-foreground self-center">Válido até {expiresLabel}</span>
             </div>
 
             {preview.email && (
-              <p className="text-sm text-center text-[#6b6057] flex items-center justify-center gap-2">
+              <p className="text-sm text-center text-muted-foreground flex items-center justify-center gap-2">
                 <Mail className="h-4 w-4 shrink-0" />
                 Convite enviado para{' '}
-                <span className="font-medium text-[#2c2522]">{preview.email}</span>
+                <span className="font-medium text-foreground">{preview.email}</span>
               </p>
             )}
 
@@ -122,8 +122,8 @@ export default async function InvitePage({ params }: PageProps) {
               <p
                 className={`text-sm rounded-lg px-4 py-3 border ${
                   statusVariant === 'error'
-                    ? 'text-[#b85c38] bg-[#fdf2ef] border-[#b85c38]/20'
-                    : 'text-[#6b6057] bg-[#f0e9df] border-[#d9d0c3]'
+                    ? 'text-destructive bg-destructive/10 border-destructive/20'
+                    : 'text-muted-foreground bg-muted border-border'
                 }`}
               >
                 {statusMessage}
@@ -152,7 +152,7 @@ export default async function InvitePage({ params }: PageProps) {
 
             {showLoginCta && (
               <div className="space-y-3 pt-2">
-                <p className="text-sm text-center text-[#6b6057]">
+                <p className="text-sm text-center text-muted-foreground">
                   Entre com seu e-mail (link mágico, sem senha) para aceitar o convite e ver as fotos
                   do projeto.
                 </p>
@@ -160,7 +160,7 @@ export default async function InvitePage({ params }: PageProps) {
                   href={loginHref}
                   className={buttonVariants({
                     className:
-                      'w-full h-12 rounded-full bg-[#8b5e3c] hover:bg-[#6f4a30] text-base',
+                      'w-full h-12 rounded-full bg-primary hover:bg-primary-dark text-base',
                   })}
                 >
                   Entrar e aceitar convite
@@ -180,15 +180,15 @@ export default async function InvitePage({ params }: PageProps) {
             )}
 
             {!process.env.SUPABASE_SERVICE_ROLE_KEY && preview.canRedeem && (
-              <p className="text-xs text-[#b85c38] text-center">
+              <p className="text-xs text-destructive text-center">
                 Configure{' '}
-                <code className="bg-white px-1 rounded">SUPABASE_SERVICE_ROLE_KEY</code> em{' '}
-                <code className="bg-white px-1 rounded">.env.local</code> para aceitar convites.
+                <code className="bg-card px-1 rounded">SUPABASE_SERVICE_ROLE_KEY</code> em{' '}
+                <code className="bg-card px-1 rounded">.env.local</code> para aceitar convites.
               </p>
             )}
 
             <div className="pt-2 text-center">
-              <Link href="/" className="text-sm text-[#6b6057] hover:text-[#2c2522]">
+              <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
                 Voltar à página inicial
               </Link>
             </div>

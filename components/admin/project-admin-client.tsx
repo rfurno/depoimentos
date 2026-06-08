@@ -117,26 +117,26 @@ export function ProjectAdminClient({
 
   return (
     <div className="space-y-10">
-      <Card className="border-[#d9d0c3] shadow-sm">
+      <Card className="border-border shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
-            <Shield className="h-5 w-5 text-[#8b5e3c]" />
+            <Shield className="h-5 w-5 text-primary" />
             Exportar para história com IA
           </CardTitle>
-          <CardDescription className="text-[#6b6057]">
-            Baixe um ZIP com imagens selecionadas + <code className="text-xs bg-[#f0e9df] px-1 rounded">MEMORIES.md</code>{' '}
+          <CardDescription className="text-muted-foreground">
+            Baixe um ZIP com imagens selecionadas + <code className="text-xs bg-muted px-1 rounded">MEMORIES.md</code>{' '}
             estruturado para colar no Grok ou outro assistente.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {!hasServiceKey && (
-            <p className="text-sm text-[#b85c38] rounded-lg bg-[#fdf2ef] px-4 py-3 border border-[#b85c38]/20">
-              Configure <code className="text-xs bg-white px-1 rounded">SUPABASE_SERVICE_ROLE_KEY</code> para
+            <p className="text-sm text-destructive rounded-lg bg-destructive/10 px-4 py-3 border border-destructive/20">
+              Configure <code className="text-xs bg-card px-1 rounded">SUPABASE_SERVICE_ROLE_KEY</code> para
               incluir imagens no ZIP.
             </p>
           )}
           <div className="flex flex-wrap items-center gap-3">
-            <label className="flex items-center gap-2 text-sm text-[#6b6057] cursor-pointer">
+            <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
               <Checkbox
                 checked={selected.size === photos.length && photos.length > 0}
                 onCheckedChange={(v) => selectAll(v === true)}
@@ -147,7 +147,7 @@ export function ProjectAdminClient({
               type="button"
               onClick={handleExport}
               disabled={exporting || selected.size === 0}
-              className="rounded-full bg-[#8b5e3c] hover:bg-[#6f4a30]"
+              className="rounded-full bg-primary hover:bg-primary-dark"
             >
               {exporting ? (
                 <>
@@ -169,7 +169,7 @@ export function ProjectAdminClient({
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-2xl font-semibold tracking-tight">Fotos</h2>
           {pendingCount > 0 && (
-            <Badge className="bg-[#fdf2ef] text-[#b85c38] border-[#b85c38]/20">
+            <Badge className="bg-destructive/10 text-destructive border-destructive/20">
               {pendingCount} aguardando aprovação
             </Badge>
           )}
@@ -191,7 +191,7 @@ export function ProjectAdminClient({
             />
           ))}
           {photos.length === 0 && (
-            <p className="text-sm text-[#6b6057] italic">Nenhuma foto neste projeto.</p>
+            <p className="text-sm text-muted-foreground italic">Nenhuma foto neste projeto.</p>
           )}
         </div>
       </section>
@@ -202,11 +202,11 @@ export function ProjectAdminClient({
           {collaborators.map((c) => (
             <li
               key={c.id}
-              className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-lg border border-[#d9d0c3] bg-white px-4 py-3"
+              className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-lg border border-border bg-card px-4 py-3"
             >
               <div>
-                <p className="font-medium text-[#2c2522]">{c.display_name}</p>
-                <p className="text-xs text-[#6b6057]">
+                <p className="font-medium text-foreground">{c.display_name}</p>
+                <p className="text-xs text-muted-foreground">
                   Desde {format(new Date(c.created_at), "d MMM yyyy", { locale: ptBR })}
                 </p>
               </div>
@@ -226,7 +226,7 @@ export function ProjectAdminClient({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="text-[#b85c38] border-[#b85c38]/30"
+                  className="text-destructive border-destructive/30"
                   disabled={isPending}
                   onClick={() => {
                     if (!confirm(`Remover ${c.display_name} do projeto?`)) return
@@ -247,7 +247,7 @@ export function ProjectAdminClient({
             </li>
           ))}
           {collaborators.length === 0 && (
-            <p className="text-sm text-[#6b6057] italic">Nenhum colaborador ainda — use convites na página do projeto.</p>
+            <p className="text-sm text-muted-foreground italic">Nenhum colaborador ainda — use convites na página do projeto.</p>
           )}
         </ul>
       </section>
@@ -258,12 +258,12 @@ export function ProjectAdminClient({
           {comments.map((c) => (
             <li
               key={c.id}
-              className="rounded-lg border border-[#d9d0c3] bg-[#faf8f5] px-4 py-3 space-y-2"
+              className="rounded-lg border border-border bg-background px-4 py-3 space-y-2"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <p className="text-sm font-medium text-[#2c2522]">{c.author_name}</p>
-                  <p className="text-xs text-[#6b6057]">
+                  <p className="text-sm font-medium text-foreground">{c.author_name}</p>
+                  <p className="text-xs text-muted-foreground">
                     em {c.photo_title?.trim() || 'foto sem título'} ·{' '}
                     {format(new Date(c.created_at), "d MMM yyyy", { locale: ptBR })}
                   </p>
@@ -272,7 +272,7 @@ export function ProjectAdminClient({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="text-[#b85c38]"
+                  className="text-destructive"
                   disabled={isPending}
                   onClick={() => {
                     if (!confirm('Excluir este comentário?')) return
@@ -291,11 +291,11 @@ export function ProjectAdminClient({
                   Remover
                 </Button>
               </div>
-              <p className="text-sm text-[#2c2522] whitespace-pre-wrap">{c.content}</p>
+              <p className="text-sm text-foreground whitespace-pre-wrap">{c.content}</p>
             </li>
           ))}
           {comments.length === 0 && (
-            <p className="text-sm text-[#6b6057] italic">Nenhum comentário a moderar.</p>
+            <p className="text-sm text-muted-foreground italic">Nenhum comentário a moderar.</p>
           )}
         </ul>
       </section>
@@ -336,7 +336,7 @@ function CollaboratorRoleSelect({
       }}
       disabled={disabled}
     >
-      <SelectTrigger className="w-[160px] h-8 bg-white border-[#d9d0c3] text-sm">
+      <SelectTrigger className="w-[160px] h-8 bg-card border-border text-sm">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -422,16 +422,16 @@ function PhotoAdminRow({
   }
 
   return (
-    <div className="rounded-lg border border-[#d9d0c3] bg-white overflow-hidden">
+    <div className="rounded-lg border border-border bg-card overflow-hidden">
       <div className="flex flex-col sm:flex-row gap-4 p-4">
         <div className="flex items-start gap-3 shrink-0">
           <Checkbox checked={selected} onCheckedChange={(v) => onSelect(v === true)} />
-          <div className="relative h-20 w-20 rounded-md overflow-hidden bg-[#f0e9df]">
+          <div className="relative h-20 w-20 rounded-md overflow-hidden bg-muted">
             {photo.signedUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={photo.signedUrl} alt="" className="h-full w-full object-cover" />
             ) : (
-              <div className="h-full w-full flex items-center justify-center text-xs text-[#6b6057]">
+              <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground">
                 sem img
               </div>
             )}
@@ -439,13 +439,13 @@ function PhotoAdminRow({
         </div>
         <div className="flex-1 min-w-0 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="font-medium text-[#2c2522] truncate">
+            <p className="font-medium text-foreground truncate">
               {photo.title?.trim() || 'Sem título'}
             </p>
             {!photo.is_approved && (
-              <Badge className="bg-[#fdf2ef] text-[#b85c38] border-0">Pendente</Badge>
+              <Badge className="bg-destructive/10 text-destructive border-0">Pendente</Badge>
             )}
-            <span className="text-xs text-[#6b6057]">
+            <span className="text-xs text-muted-foreground">
               {photo.comment_count} comentário{photo.comment_count === 1 ? '' : 's'}
             </span>
           </div>
@@ -458,7 +458,7 @@ function PhotoAdminRow({
                   id={`title-${photo.id}`}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="bg-white border-[#d9d0c3]"
+                  className="bg-card border-border"
                 />
               </div>
               <div className="space-y-1">
@@ -467,7 +467,7 @@ function PhotoAdminRow({
                   id={`caption-${photo.id}`}
                   value={caption}
                   onChange={(e) => setCaption(e.target.value)}
-                  className="bg-white border-[#d9d0c3]"
+                  className="bg-card border-border"
                 />
               </div>
               <div className="space-y-1">
@@ -477,7 +477,7 @@ function PhotoAdminRow({
                   value={story}
                   onChange={(e) => setStory(e.target.value)}
                   rows={3}
-                  className="bg-white border-[#d9d0c3]"
+                  className="bg-card border-border"
                 />
               </div>
               <div className="flex gap-2">
@@ -497,7 +497,7 @@ function PhotoAdminRow({
           ) : (
             <>
               {photo.caption && (
-                <p className="text-sm text-[#6b6057] line-clamp-2">{photo.caption}</p>
+                <p className="text-sm text-muted-foreground line-clamp-2">{photo.caption}</p>
               )}
               <div className="flex flex-wrap gap-2">
                 <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}>
@@ -508,7 +508,7 @@ function PhotoAdminRow({
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="text-[#6b6057]"
+                    className="text-muted-foreground"
                     disabled={isPending}
                     onClick={() => toggleApproval(false)}
                   >
@@ -520,7 +520,7 @@ function PhotoAdminRow({
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="text-[#8b5e3c]"
+                    className="text-primary"
                     disabled={isPending}
                     onClick={() => toggleApproval(true)}
                   >
@@ -532,7 +532,7 @@ function PhotoAdminRow({
                   type="button"
                   size="sm"
                   variant="outline"
-                  className="text-[#b85c38] border-[#b85c38]/30"
+                  className="text-destructive border-destructive/30"
                   disabled={isPending}
                   onClick={handleDelete}
                 >

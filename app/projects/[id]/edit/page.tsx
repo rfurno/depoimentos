@@ -35,7 +35,7 @@ export default async function EditProjectPage({ params }: PageProps) {
       <main className="mx-auto max-w-5xl px-6 py-12">
         <Link
           href={`/projects/${project.id}`}
-          className="inline-flex items-center text-sm text-[#6b6057] hover:text-[#2c2522] mb-8"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar ao projeto

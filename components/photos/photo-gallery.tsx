@@ -53,12 +53,12 @@ export function PhotoGallery({
 
   if (photos.length === 0) {
     return (
-      <div className="rounded-2xl border border-[#d9d0c3] bg-white p-12 text-center">
-        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f0e9df]">
-          <Images className="h-7 w-7 text-[#8b5e3c]" />
+      <div className="rounded-2xl border border-border bg-card p-12 text-center">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
+          <Images className="h-7 w-7 text-primary" />
         </div>
         <h2 className="text-xl font-semibold tracking-tight mb-2">Nenhuma foto ainda</h2>
-        <p className="text-[#6b6057] max-w-md mx-auto text-sm">
+        <p className="text-muted-foreground max-w-md mx-auto text-sm">
           Adicione a primeira memória usando o painel acima. Toque em qualquer foto para ver
           detalhes e comentários da família.
         </p>
@@ -83,13 +83,13 @@ export function PhotoGallery({
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6b6057]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Buscar por título, legenda ou história..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-white border-[#d9d0c3] h-11"
+            className="pl-9 bg-card border-border h-11"
             aria-label="Buscar fotos"
           />
         </div>
@@ -97,7 +97,7 @@ export function PhotoGallery({
           <div className="flex gap-2 shrink-0">
             <Button
               type="button"
-              className="bg-[#8b5e3c] hover:bg-[#6d4a2f] text-white"
+              className="bg-primary hover:bg-primary-dark text-white"
               onClick={() => openSlideshow()}
             >
               <Play className="mr-2 h-4 w-4" />
@@ -109,7 +109,7 @@ export function PhotoGallery({
                   ? `/projects/${projectId}/slideshow?photo=${selectedPhotoId}`
                   : `/projects/${projectId}/slideshow`
               }
-              className="inline-flex h-7 items-center justify-center rounded-[min(var(--radius-md),12px)] border border-[#d9d0c3] bg-background px-2.5 text-[0.8rem] font-medium hover:bg-muted"
+              className="inline-flex h-7 items-center justify-center rounded-[min(var(--radius-md),12px)] border border-border bg-background px-2.5 text-[0.8rem] font-medium hover:bg-muted"
             >
               Tela cheia
             </Link>
@@ -118,7 +118,7 @@ export function PhotoGallery({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-[#6b6057] py-8 text-center">Nenhuma foto corresponde à busca.</p>
+        <p className="text-sm text-muted-foreground py-8 text-center">Nenhuma foto corresponde à busca.</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {filtered.map((photo) => {
@@ -133,7 +133,7 @@ export function PhotoGallery({
                 key={photo.id}
                 role="button"
                 tabIndex={0}
-                className="group relative rounded-xl overflow-hidden border border-[#d9d0c3] bg-[#e8e0d5] aspect-square cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5e3c] focus-visible:ring-offset-2"
+                className="group relative rounded-xl overflow-hidden border border-border bg-muted aspect-square cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 onClick={() => setSelectedPhotoId(photo.id)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
@@ -152,7 +152,7 @@ export function PhotoGallery({
                     loading="lazy"
                   />
                 ) : (
-                  <div className="h-full w-full flex items-center justify-center text-xs text-[#6b6057] p-4 text-center">
+                  <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground p-4 text-center">
                     Imagem indisponível
                   </div>
                 )}
@@ -166,7 +166,7 @@ export function PhotoGallery({
 
                 <div className="absolute top-2 left-2 flex flex-wrap gap-1">
                   {!photo.is_approved && isOwner && (
-                    <Badge className="bg-[#b85c38] text-white border-0 text-[10px]">
+                    <Badge className="bg-destructive text-white border-0 text-[10px]">
                       Pendente
                     </Badge>
                   )}
@@ -193,7 +193,7 @@ export function PhotoGallery({
         </div>
       )}
 
-      <p className="text-xs text-[#6b6057] text-center">
+      <p className="text-xs text-muted-foreground text-center">
         {filtered.length} de {photos.length} foto{photos.length !== 1 ? 's' : ''}
         {search.trim() ? ' (filtradas)' : ''}
         {' · '}

@@ -58,7 +58,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
       <main className="mx-auto max-w-5xl px-6 py-12">
         <Link
           href="/dashboard"
-          className="inline-flex items-center text-sm text-[#6b6057] hover:text-[#2c2522] mb-6"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar aos projetos
@@ -67,18 +67,18 @@ export default async function ProjectDetailPage({ params }: PageProps) {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className="bg-[#f0e9df] text-[#6b6057] border-0">
+              <Badge variant="secondary" className="bg-muted text-muted-foreground border-0">
                 {roleLabel(role)}
               </Badge>
-              <span className="text-xs text-[#6b6057]">Criado em {createdLabel}</span>
+              <span className="text-xs text-muted-foreground">Criado em {createdLabel}</span>
             </div>
-            <h1 className="text-4xl tracking-tighter font-semibold text-[#2c2522]">
+            <h1 className="text-4xl tracking-tighter font-semibold text-foreground">
               {project.title}
             </h1>
             {project.description ? (
-              <p className="text-lg text-[#6b6057] max-w-2xl">{project.description}</p>
+              <p className="text-lg text-muted-foreground max-w-2xl">{project.description}</p>
             ) : (
-              <p className="text-[#6b6057] italic">Sem descrição</p>
+              <p className="text-muted-foreground italic">Sem descrição</p>
             )}
           </div>
 
@@ -104,9 +104,9 @@ export default async function ProjectDetailPage({ params }: PageProps) {
         </div>
 
         {!hasServiceKey && photos.length > 0 && photos.every((p) => !p.signedUrl) && (
-          <p className="mt-6 text-sm text-[#b85c38] rounded-lg bg-[#fdf2ef] px-4 py-3 border border-[#b85c38]/20">
-            Configure <code className="text-xs bg-white px-1 rounded">SUPABASE_SERVICE_ROLE_KEY</code>{' '}
-            em <code className="text-xs bg-white px-1 rounded">.env.local</code> para exibir imagens do
+          <p className="mt-6 text-sm text-destructive rounded-lg bg-destructive/10 px-4 py-3 border border-destructive/20">
+            Configure <code className="text-xs bg-card px-1 rounded">SUPABASE_SERVICE_ROLE_KEY</code>{' '}
+            em <code className="text-xs bg-card px-1 rounded">.env.local</code> para exibir imagens do
             bucket privado (recomendado).
           </p>
         )}

@@ -19,28 +19,28 @@ export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <Link
       href={`/projects/${project.id}`}
-      className="group block rounded-2xl border border-[#d9d0c3] bg-white p-6 shadow-sm transition hover:border-[#8b5e3c]/40 hover:shadow-md"
+      className="group block rounded-2xl border border-border bg-card p-6 shadow-sm transition hover:border-primary/40 hover:shadow-md"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#f0e9df] text-[#8b5e3c] transition group-hover:bg-[#e8dfd3]">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-muted text-primary transition group-hover:bg-muted/80">
           <FolderOpen className="h-5 w-5" />
         </div>
-        <Badge variant="secondary" className="bg-[#f0e9df] text-[#6b6057] border-0">
+        <Badge variant="secondary" className="bg-muted text-muted-foreground border-0">
           {roleLabel(project.role)}
         </Badge>
       </div>
 
-      <h3 className="mt-4 text-xl font-semibold tracking-tight text-[#2c2522] group-hover:text-[#8b5e3c]">
+      <h3 className="mt-4 text-xl font-semibold tracking-tight text-foreground group-hover:text-primary">
         {project.title}
       </h3>
 
       {project.description ? (
-        <p className="mt-2 line-clamp-2 text-sm text-[#6b6057]">{project.description}</p>
+        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{project.description}</p>
       ) : (
-        <p className="mt-2 text-sm italic text-[#6b6057]/80">Sem descrição ainda</p>
+        <p className="mt-2 text-sm italic text-muted-foreground/80">Sem descrição ainda</p>
       )}
 
-      <p className="mt-4 text-xs text-[#6b6057]">Atualizado {updatedAgo}</p>
+      <p className="mt-4 text-xs text-muted-foreground">Atualizado {updatedAgo}</p>
     </Link>
   )
 }

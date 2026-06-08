@@ -87,32 +87,32 @@ export function ProjectInvitesPanel({
   const pastInvites = invites.filter((i) => !i.isActive)
 
   return (
-    <Card className="border-[#d9d0c3] shadow-sm">
+    <Card className="border-border shadow-sm">
       <CardHeader>
         <CardTitle className="text-xl tracking-tight flex items-center gap-2">
-          <UserPlus className="h-5 w-5 text-[#8b5e3c]" />
+          <UserPlus className="h-5 w-5 text-primary" />
           Convidar família
         </CardTitle>
-        <CardDescription className="text-[#6b6057]">
+        <CardDescription className="text-muted-foreground">
           Gere um link seguro. Quem receber entra com link mágico e entra no projeto automaticamente.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {!hasServiceKey && (
-          <p className="text-sm text-[#b85c38] rounded-lg bg-[#fdf2ef] px-4 py-3 border border-[#b85c38]/20">
-            Configure <code className="text-xs bg-white px-1 rounded">SUPABASE_SERVICE_ROLE_KEY</code>{' '}
+          <p className="text-sm text-destructive rounded-lg bg-destructive/10 px-4 py-3 border border-destructive/20">
+            Configure <code className="text-xs bg-card px-1 rounded">SUPABASE_SERVICE_ROLE_KEY</code>{' '}
             para que convidados possam aceitar o convite após o login.
           </p>
         )}
 
-        <form action={formAction} className="space-y-4 rounded-lg border border-[#d9d0c3] bg-[#faf8f5] p-4">
+        <form action={formAction} className="space-y-4 rounded-lg border border-border bg-background p-4">
           {state.error && (
-            <p className="text-sm text-[#b85c38] rounded-lg bg-[#fdf2ef] px-3 py-2 border border-[#b85c38]/20">
+            <p className="text-sm text-destructive rounded-lg bg-destructive/10 px-3 py-2 border border-destructive/20">
               {state.error}
             </p>
           )}
           {state.inviteUrl && (
-            <p className="text-sm text-[#8b5e3c] rounded-lg bg-[#f0e9df] px-3 py-2">
+            <p className="text-sm text-primary rounded-lg bg-muted px-3 py-2">
               Novo link criado — copiado para a área de transferência.
             </p>
           )}
@@ -125,7 +125,7 @@ export function ProjectInvitesPanel({
                 value={role}
                 onValueChange={(v) => v && setRole(v as InviteRole)}
               >
-                <SelectTrigger id="invite-role" className="w-full bg-white border-[#d9d0c3]">
+                <SelectTrigger id="invite-role" className="w-full bg-card border-border">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -145,12 +145,12 @@ export function ProjectInvitesPanel({
                 name="email"
                 type="email"
                 placeholder="tio@familia.com"
-                className="bg-white border-[#d9d0c3]"
+                className="bg-card border-border"
               />
               {state.fieldErrors?.email?.[0] && (
-                <p className="text-sm text-[#b85c38]">{state.fieldErrors.email[0]}</p>
+                <p className="text-sm text-destructive">{state.fieldErrors.email[0]}</p>
               )}
-              <p className="text-xs text-[#6b6057]">Só uma dica na tela do convite — qualquer e-mail pode aceitar.</p>
+              <p className="text-xs text-muted-foreground">Só uma dica na tela do convite — qualquer e-mail pode aceitar.</p>
             </div>
 
             <div className="space-y-2">
@@ -160,7 +160,7 @@ export function ProjectInvitesPanel({
                 value={expiresInDays}
                 onValueChange={(v) => v && setExpiresInDays(v)}
               >
-                <SelectTrigger id="invite-expires" className="w-full bg-white border-[#d9d0c3]">
+                <SelectTrigger id="invite-expires" className="w-full bg-card border-border">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -177,7 +177,7 @@ export function ProjectInvitesPanel({
           <Button
             type="submit"
             disabled={pending}
-            className="rounded-full bg-[#8b5e3c] hover:bg-[#6f4a30]"
+            className="rounded-full bg-primary hover:bg-primary-dark"
           >
             {pending ? (
               <>
@@ -195,7 +195,7 @@ export function ProjectInvitesPanel({
 
         {activeInvites.length > 0 && (
           <div className="space-y-3">
-            <h3 className="text-sm font-medium text-[#2c2522]">Links ativos</h3>
+            <h3 className="text-sm font-medium text-foreground">Links ativos</h3>
             <ul className="space-y-2">
               {activeInvites.map((invite) => (
                 <InviteListItem
@@ -212,7 +212,7 @@ export function ProjectInvitesPanel({
 
         {pastInvites.length > 0 && (
           <div className="space-y-3">
-            <h3 className="text-sm font-medium text-[#6b6057]">Histórico</h3>
+            <h3 className="text-sm font-medium text-muted-foreground">Histórico</h3>
             <ul className="space-y-2 opacity-80">
               {pastInvites.map((invite) => (
                 <InviteListItem key={invite.id} invite={invite} past />
@@ -222,7 +222,7 @@ export function ProjectInvitesPanel({
         )}
 
         {invites.length === 0 && (
-          <p className="text-sm text-[#6b6057] italic">
+          <p className="text-sm text-muted-foreground italic">
             Nenhum convite ainda. Gere um link e envie por WhatsApp ou e-mail.
           </p>
         )}
@@ -252,16 +252,16 @@ function InviteListItem({
       : 'Ativo'
 
   return (
-    <li className="flex flex-col gap-2 rounded-lg border border-[#d9d0c3] bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+    <li className="flex flex-col gap-2 rounded-lg border border-border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 space-y-1">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="secondary" className="bg-[#f0e9df] text-[#6b6057] border-0 text-xs">
+          <Badge variant="secondary" className="bg-muted text-muted-foreground border-0 text-xs">
             {inviteRoleShortLabel(invite.role)}
           </Badge>
-          <span className="text-xs text-[#6b6057]">{status} · até {expiresLabel}</span>
+          <span className="text-xs text-muted-foreground">{status} · até {expiresLabel}</span>
         </div>
         {invite.email && (
-          <p className="text-xs text-[#6b6057] truncate">{invite.email}</p>
+          <p className="text-xs text-muted-foreground truncate">{invite.email}</p>
         )}
       </div>
       {!past && onCopy && onRevoke && (
@@ -274,7 +274,7 @@ function InviteListItem({
             type="button"
             variant="outline"
             size="sm"
-            className="text-[#b85c38] border-[#b85c38]/30 hover:bg-[#fdf2ef]"
+            className="text-destructive border-destructive/30 hover:bg-destructive/10"
             onClick={onRevoke}
             disabled={revokeDisabled}
           >

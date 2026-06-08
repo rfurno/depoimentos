@@ -101,11 +101,11 @@ function CommentItem({
   }
 
   return (
-    <li className="rounded-lg border border-[#d9d0c3] bg-[#faf8f5] p-3 space-y-2">
+    <li className="rounded-lg border border-border bg-background p-3 space-y-2">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-sm font-medium text-[#2c2522]">{comment.author_name}</p>
-          <p className="text-xs text-[#6b6057]">{timeAgo}</p>
+          <p className="text-sm font-medium text-foreground">{comment.author_name}</p>
+          <p className="text-xs text-muted-foreground">{timeAgo}</p>
         </div>
         {isOwn && !editing && (
           <div className="flex shrink-0 gap-1">
@@ -113,7 +113,7 @@ function CommentItem({
               type="button"
               variant="ghost"
               size="icon-sm"
-              className="h-8 w-8 text-[#6b6057]"
+              className="h-8 w-8 text-muted-foreground"
               onClick={() => {
                 setDraft(comment.content)
                 setEditing(true)
@@ -127,7 +127,7 @@ function CommentItem({
               type="button"
               variant="ghost"
               size="icon-sm"
-              className="h-8 w-8 text-[#b85c38]"
+              className="h-8 w-8 text-destructive"
               onClick={handleDelete}
               disabled={isPending}
               aria-label="Excluir comentário"
@@ -149,7 +149,7 @@ function CommentItem({
             onChange={(e) => setDraft(e.target.value)}
             maxLength={MAX_COMMENT_LENGTH}
             rows={3}
-            className="bg-white border-[#d9d0c3] resize-y min-h-[72px]"
+            className="bg-card border-border resize-y min-h-[72px]"
             disabled={isPending}
           />
           <div className="flex gap-2 justify-end">
@@ -171,7 +171,7 @@ function CommentItem({
           </div>
         </div>
       ) : (
-        <p className="text-sm text-[#2c2522] whitespace-pre-wrap leading-relaxed">
+        <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
           {comment.content}
         </p>
       )}
@@ -254,12 +254,12 @@ export function PhotoDetailModal({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="sm:max-w-2xl max-h-[min(92vh,900px)] overflow-y-auto p-0 gap-0 border-[#d9d0c3]"
+        className="sm:max-w-2xl max-h-[min(92vh,900px)] overflow-y-auto p-0 gap-0 border-border"
         showCloseButton
       >
         {photo && (
           <>
-            <div className="relative bg-[#e8e0d5]">
+            <div className="relative bg-muted">
               {photo.signedUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -268,12 +268,12 @@ export function PhotoDetailModal({
                   className="w-full max-h-[50vh] object-contain"
                 />
               ) : (
-                <div className="flex h-48 items-center justify-center text-sm text-[#6b6057]">
+                <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
                   Imagem indisponível
                 </div>
               )}
               {!photo.is_approved && isOwner && (
-                <Badge className="absolute top-3 left-3 bg-[#b85c38] text-white border-0">
+                <Badge className="absolute top-3 left-3 bg-destructive text-white border-0">
                   Aguardando aprovação
                 </Badge>
               )}
@@ -283,10 +283,10 @@ export function PhotoDetailModal({
               <DialogHeader className="text-left gap-1 p-0">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <DialogTitle className="text-2xl tracking-tight text-[#2c2522]">
+                    <DialogTitle className="text-2xl tracking-tight text-foreground">
                       {title}
                     </DialogTitle>
-                    <DialogDescription className="text-[#6b6057]">
+                    <DialogDescription className="text-muted-foreground">
                       Adicionada em {createdLabel}
                     </DialogDescription>
                   </div>
@@ -295,7 +295,7 @@ export function PhotoDetailModal({
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="border-[#d9d0c3] shrink-0"
+                      className="border-border shrink-0"
                       onClick={() => {
                         handleOpenChange(false)
                         onOpenSlideshow()
@@ -312,18 +312,18 @@ export function PhotoDetailModal({
                 <div className="space-y-3 text-sm">
                   {photo.caption && (
                     <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-[#6b6057] mb-1">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">
                         Legenda
                       </p>
-                      <p className="text-[#2c2522] leading-relaxed">{photo.caption}</p>
+                      <p className="text-foreground leading-relaxed">{photo.caption}</p>
                     </div>
                   )}
                   {photo.story && (
                     <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-[#6b6057] mb-1">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">
                         História
                       </p>
-                      <p className="text-[#2c2522] leading-relaxed whitespace-pre-wrap">
+                      <p className="text-foreground leading-relaxed whitespace-pre-wrap">
                         {photo.story}
                       </p>
                     </div>
@@ -331,18 +331,18 @@ export function PhotoDetailModal({
                 </div>
               )}
 
-              <Separator className="bg-[#d9d0c3]" />
+              <Separator className="bg-border" />
 
               <section className="space-y-4" aria-labelledby="comments-heading">
                 <div className="flex items-center gap-2">
-                  <MessageCircle className="h-5 w-5 text-[#8b5e3c]" />
+                  <MessageCircle className="h-5 w-5 text-primary" />
                   <h2
                     id="comments-heading"
-                    className="text-lg font-semibold tracking-tight text-[#2c2522]"
+                    className="text-lg font-semibold tracking-tight text-foreground"
                   >
                     Comentários
                     {comments != null && comments.length > 0 && (
-                      <span className="text-[#6b6057] font-normal ml-1">
+                      <span className="text-muted-foreground font-normal ml-1">
                         ({comments.length})
                       </span>
                     )}
@@ -350,11 +350,11 @@ export function PhotoDetailModal({
                 </div>
 
                 {comments === null ? (
-                  <div className="flex items-center justify-center py-8 text-[#6b6057]">
+                  <div className="flex items-center justify-center py-8 text-muted-foreground">
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
                 ) : comments.length === 0 ? (
-                  <p className="text-sm text-[#6b6057] py-2">
+                  <p className="text-sm text-muted-foreground py-2">
                     Nenhum comentário ainda. Seja o primeiro a compartilhar uma memória sobre esta
                     foto.
                   </p>
@@ -375,7 +375,7 @@ export function PhotoDetailModal({
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="new-comment" className="text-[#2c2522]">
+                  <Label htmlFor="new-comment" className="text-foreground">
                     Adicionar comentário
                   </Label>
                   <Textarea
@@ -385,18 +385,18 @@ export function PhotoDetailModal({
                     onChange={(e) => setNewComment(e.target.value)}
                     maxLength={MAX_COMMENT_LENGTH}
                     rows={3}
-                    className="bg-white border-[#d9d0c3] resize-y min-h-[80px]"
+                    className="bg-card border-border resize-y min-h-[80px]"
                     disabled={isPending}
                   />
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-[#6b6057]">
+                    <span className="text-xs text-muted-foreground">
                       {newComment.length}/{MAX_COMMENT_LENGTH}
                     </span>
                     <Button
                       type="button"
                       onClick={handleAddComment}
                       disabled={isPending || !newComment.trim()}
-                      className="bg-[#8b5e3c] hover:bg-[#6d4a2f] text-white"
+                      className="bg-primary hover:bg-primary-dark text-white"
                     >
                       {isPending ? (
                         <>
