@@ -6,8 +6,11 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import {
   Check,
+  ChevronDown,
+  ChevronRight,
   Download,
   Loader2,
+  MessageCircle,
   Shield,
   Trash2,
   UserMinus,
@@ -68,6 +71,21 @@ export function ProjectAdminClient({
   const [isPending, startTransition] = useTransition()
 
   const pendingCount = useMemo(() => photos.filter((p) => !p.is_approved).length, [photos])
+
+  const commentsByPhotoId = useMemo(() => {
+    const map = new Map<string, ModerationComment[]>()
+    for (const comment of comments) {
+      const list = map.get(comment.photo_id) ?? []
+      list.push(comment)
+      map.set(comment.photo_id, list)
+    }
+    for (const list of map.values()) {
+      list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    }
+    return map
+  }, [comments])
+
+  const totalComments = comments.length
 
   function refresh() {
     router.refresh()
@@ -166,13 +184,20 @@ export function ProjectAdminClient({
       </Card>
 
       <section className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-2xl font-semibold tracking-tight">Fotos</h2>
-          {pendingCount > 0 && (
-            <Badge className="bg-destructive/10 text-destructive border-destructive/20">
-              {pendingCount} aguardando aprovação
-            </Badge>
-          )}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h2 className="text-2xl font-semibold tracking-tight">Fotos e comentários</h2>
+          <div className="flex flex-wrap gap-2">
+            {pendingCount > 0 && (
+              <Badge className="bg-destructive/10 text-destructive border-destructive/20">
+                {pendingCount} aguardando aprovação
+              </Badge>
+            )}
+            {totalComments > 0 && (
+              <Badge variant="secondary" className="bg-muted text-text-secondary border-0">
+                {totalComments} comentário{totalComments === 1 ? '' : 's'}
+              </Badge>
+            )}
+          </div>
         </div>
         <div className="space-y-4">
           {photos.map((photo) => (
@@ -180,6 +205,7 @@ export function ProjectAdminClient({
               key={photo.id}
               photo={photo}
               projectId={projectId}
+              comments={commentsByPhotoId.get(photo.id) ?? []}
               selected={selected.has(photo.id)}
               onSelect={(checked) => toggleSelected(photo.id, checked)}
               isPending={isPending}
@@ -187,7 +213,20 @@ export function ProjectAdminClient({
               onLocalUpdate={(updated) =>
                 setPhotos((prev) => prev.map((p) => (p.id === updated.id ? updated : p)))
               }
-              onRemoved={() => setPhotos((prev) => prev.filter((p) => p.id !== photo.id))}
+              onRemoved={() => {
+                setPhotos((prev) => prev.filter((p) => p.id !== photo.id))
+                setComments((prev) => prev.filter((c) => c.photo_id !== photo.id))
+              }}
+              onCommentRemoved={(commentId) => {
+                setComments((prev) => prev.filter((c) => c.id !== commentId))
+                setPhotos((prev) =>
+                  prev.map((p) =>
+                    p.id === photo.id
+                      ? { ...p, comment_count: Math.max(0, p.comment_count - 1) }
+                      : p
+                  )
+                )
+              }}
             />
           ))}
           {photos.length === 0 && (
@@ -252,53 +291,6 @@ export function ProjectAdminClient({
         </ul>
       </section>
 
-      <section className="space-y-4">
-        <h2 className="text-2xl font-semibold tracking-tight">Comentários</h2>
-        <ul className="space-y-2">
-          {comments.map((c) => (
-            <li
-              key={c.id}
-              className="rounded-lg border border-border bg-background px-4 py-3 space-y-2"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <div>
-                  <p className="text-sm font-medium text-foreground">{c.author_name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    em {c.photo_title?.trim() || 'foto sem título'} ·{' '}
-                    {format(new Date(c.created_at), "d MMM yyyy", { locale: ptBR })}
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive"
-                  disabled={isPending}
-                  onClick={() => {
-                    if (!confirm('Excluir este comentário?')) return
-                    startTransition(async () => {
-                      const result = await deleteCommentAsOwner(projectId, c.id)
-                      if (result.error) {
-                        toast.error('Não foi possível excluir', { description: result.error })
-                        return
-                      }
-                      setComments((prev) => prev.filter((row) => row.id !== c.id))
-                      toast.success('Comentário removido')
-                    })
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Remover
-                </Button>
-              </div>
-              <p className="text-sm text-foreground whitespace-pre-wrap">{c.content}</p>
-            </li>
-          ))}
-          {comments.length === 0 && (
-            <p className="text-sm text-muted-foreground italic">Nenhum comentário a moderar.</p>
-          )}
-        </ul>
-      </section>
     </div>
   )
 }
@@ -353,23 +345,28 @@ function CollaboratorRoleSelect({
 function PhotoAdminRow({
   photo,
   projectId,
+  comments,
   selected,
   onSelect,
   isPending,
   onUpdated,
   onLocalUpdate,
   onRemoved,
+  onCommentRemoved,
 }: {
   photo: GalleryPhoto
   projectId: string
+  comments: ModerationComment[]
   selected: boolean
   onSelect: (checked: boolean) => void
   isPending: boolean
   onUpdated: () => void
   onLocalUpdate: (photo: GalleryPhoto) => void
   onRemoved: () => void
+  onCommentRemoved: (commentId: string) => void
 }) {
   const [editing, setEditing] = useState(false)
+  const [commentsOpen, setCommentsOpen] = useState(comments.length > 0)
   const [title, setTitle] = useState(photo.title ?? '')
   const [caption, setCaption] = useState(photo.caption ?? '')
   const [story, setStory] = useState(photo.story ?? '')
@@ -543,6 +540,117 @@ function PhotoAdminRow({
           )}
         </div>
       </div>
+
+      <PhotoCommentsPanel
+        photoId={photo.id}
+        projectId={projectId}
+        comments={comments}
+        isOpen={commentsOpen}
+        onToggle={() => setCommentsOpen((open) => !open)}
+        isPending={isPending}
+        onCommentRemoved={onCommentRemoved}
+      />
+    </div>
+  )
+}
+
+function PhotoCommentsPanel({
+  photoId,
+  projectId,
+  comments,
+  isOpen,
+  onToggle,
+  isPending,
+  onCommentRemoved,
+}: {
+  photoId: string
+  projectId: string
+  comments: ModerationComment[]
+  isOpen: boolean
+  onToggle: () => void
+  isPending: boolean
+  onCommentRemoved: (commentId: string) => void
+}) {
+  const [, startTransition] = useTransition()
+
+  function handleDelete(commentId: string) {
+    if (!confirm('Excluir este comentário?')) return
+    startTransition(async () => {
+      const result = await deleteCommentAsOwner(projectId, commentId)
+      if (result.error) {
+        toast.error('Não foi possível excluir', { description: result.error })
+        return
+      }
+      onCommentRemoved(commentId)
+      toast.success('Comentário removido')
+    })
+  }
+
+  return (
+    <div className="border-t border-border bg-muted/40">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-foreground hover:bg-muted/60 transition-colors"
+        aria-expanded={isOpen}
+        aria-controls={`photo-comments-${photoId}`}
+      >
+        {isOpen ? (
+          <ChevronDown className="h-4 w-4 shrink-0 text-brand" />
+        ) : (
+          <ChevronRight className="h-4 w-4 shrink-0 text-brand" />
+        )}
+        <MessageCircle className="h-4 w-4 shrink-0 icon-brand" />
+        <span>
+          {comments.length === 0
+            ? 'Nenhum comentário nesta foto'
+            : `${comments.length} comentário${comments.length === 1 ? '' : 's'}`}
+        </span>
+      </button>
+
+      {isOpen && comments.length > 0 && (
+        <ul id={`photo-comments-${photoId}`} className="space-y-0 border-t border-border/60">
+          {comments.map((comment, index) => (
+            <li
+              key={comment.id}
+              className={`flex gap-3 px-4 py-3 ${
+                index < comments.length - 1 ? 'border-b border-border/60' : ''
+              }`}
+            >
+              <div
+                className="mt-1.5 h-full w-0.5 shrink-0 rounded-full bg-brand/40"
+                aria-hidden
+              />
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{comment.author_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(comment.created_at), "d MMM yyyy 'às' HH:mm", {
+                        locale: ptBR,
+                      })}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 shrink-0 text-destructive hover:bg-destructive/10"
+                    disabled={isPending}
+                    onClick={() => handleDelete(comment.id)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Remover
+                  </Button>
+                </div>
+                <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+                  {comment.content}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
