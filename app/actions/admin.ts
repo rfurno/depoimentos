@@ -169,6 +169,83 @@ export async function updateCollaboratorRole(
 
   if (error) return { error: projectMutationError('updateCollaboratorRole', error) }
 
+  revalidatePath(`/projects/${check.projectUuid}`)
+  revalidatePath(`/projects/${check.projectUuid}/admin`)
+  return {}
+}
+
+/** Owner: add someone who already collaborates on another project you own. */
+export async function addExistingCollaborator(
+  projectId: string,
+  memberUserId: string,
+  role: CollaboratorRole
+): Promise<AdminActionState> {
+  const memberUuid = parseUuid(memberUserId)
+  if (!memberUuid) return { error: 'Pessoa inválida.' }
+
+  const parsedRole = collaboratorRoleSchema.safeParse(role)
+  if (!parsedRole.success) return { error: 'Papel inválido.' }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Você precisa estar conectado.' }
+
+  const check = await assertOwner(projectId, user.id)
+  if ('error' in check) return check
+
+  if (memberUuid === user.id) {
+    return { error: 'Você já é o proprietário deste projeto.' }
+  }
+
+  const { data: alreadyMember } = await supabase
+    .from('project_collaborators')
+    .select('id')
+    .eq('project_id', check.projectUuid)
+    .eq('user_id', memberUuid)
+    .maybeSingle()
+
+  if (alreadyMember) {
+    return { error: 'Esta pessoa já participa deste projeto.' }
+  }
+
+  const { data: ownedProjects } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('owner_id', user.id)
+
+  const ownedIds = (ownedProjects ?? [])
+    .map((p) => p.id)
+    .filter((id) => id !== check.projectUuid)
+
+  if (ownedIds.length === 0) {
+    return { error: 'Não há outros projetos seus com colaboradores registrados.' }
+  }
+
+  const { data: networkMembership } = await supabase
+    .from('project_collaborators')
+    .select('id')
+    .in('project_id', ownedIds)
+    .eq('user_id', memberUuid)
+    .limit(1)
+    .maybeSingle()
+
+  if (!networkMembership) {
+    return {
+      error: 'Esta pessoa precisa já participar de outro projeto seu (com conta registrada).',
+    }
+  }
+
+  const { error } = await supabase.from('project_collaborators').insert({
+    project_id: check.projectUuid,
+    user_id: memberUuid,
+    role: parsedRole.data,
+  })
+
+  if (error) return { error: projectMutationError('addExistingCollaborator', error) }
+
+  revalidatePath(`/projects/${check.projectUuid}`)
   revalidatePath(`/projects/${check.projectUuid}/admin`)
   return {}
 }
@@ -209,6 +286,7 @@ export async function removeCollaborator(
 
   if (error) return { error: projectMutationError('removeCollaborator', error) }
 
+  revalidatePath(`/projects/${check.projectUuid}`)
   revalidatePath(`/projects/${check.projectUuid}/admin`)
   return {}
 }

@@ -12,16 +12,22 @@ import {
   Phone,
   Send,
   Trash2,
+  UserMinus,
   UserPlus,
   Users,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import {
+  addExistingCollaborator,
+  removeCollaborator,
+} from '@/app/actions/admin'
 import {
   createProjectInvite,
   resendMemberLoginLink,
   revokeProjectInvite,
   type InviteActionState,
 } from '@/app/actions/invites'
+import type { NetworkCollaboratorOption } from '@/lib/collaborators/network-queries'
 import { INVITE_DEFAULT_EXPIRY_DAYS, INVITE_EXPIRY_OPTIONS } from '@/lib/invites/constants'
 import { inviteRoleLabel, inviteRoleShortLabel } from '@/lib/invites/labels'
 import { roleLabel } from '@/lib/projects/labels'
@@ -56,18 +62,26 @@ type ProjectPeoplePanelProps = {
   projectId: string
   people: ProjectPersonRow[]
   hasServiceKey: boolean
+  isOwner: boolean
+  networkCollaborators: NetworkCollaboratorOption[]
 }
 
 export function ProjectPeoplePanel({
   projectId,
   people,
   hasServiceKey,
+  isOwner,
+  networkCollaborators,
 }: ProjectPeoplePanelProps) {
   const router = useRouter()
   const [role, setRole] = useState<InviteRole>('contributor')
   const [expiresInDays, setExpiresInDays] = useState(String(INVITE_DEFAULT_EXPIRY_DAYS))
+  const [addRole, setAddRole] = useState<InviteRole>('contributor')
+  const [selectedUserId, setSelectedUserId] = useState('')
   const [revokePending, startRevoke] = useTransition()
   const [resendPending, startResend] = useTransition()
+  const [addPending, startAdd] = useTransition()
+  const [removePending, startRemove] = useTransition()
   const lastCopiedUrl = useRef<string | null>(null)
 
   const boundCreate = createProjectInvite.bind(null, projectId)
@@ -114,6 +128,36 @@ export function ProjectPeoplePanel({
       toast.success('Link de entrada enviado', {
         description: `Um link mágico foi enviado para o e-mail de ${label}.`,
       })
+    })
+  }
+
+  function handleAddExisting() {
+    if (!selectedUserId) {
+      toast.error('Selecione uma pessoa')
+      return
+    }
+    startAdd(async () => {
+      const result = await addExistingCollaborator(projectId, selectedUserId, addRole)
+      if (result.error) {
+        toast.error('Não foi possível adicionar', { description: result.error })
+        return
+      }
+      toast.success('Pessoa adicionada ao projeto')
+      setSelectedUserId('')
+      router.refresh()
+    })
+  }
+
+  function handleRemoveMember(collaboratorId: string, label: string) {
+    if (!confirm(`Remover ${label} deste projeto?`)) return
+    startRemove(async () => {
+      const result = await removeCollaborator(projectId, collaboratorId)
+      if (result.error) {
+        toast.error('Não foi possível remover', { description: result.error })
+        return
+      }
+      toast.success('Pessoa removida do projeto')
+      router.refresh()
     })
   }
 
@@ -255,6 +299,69 @@ export function ProjectPeoplePanel({
           </Button>
         </form>
 
+        {isOwner && networkCollaborators.length > 0 && (
+          <div className="space-y-4 rounded-xl border border-border bg-muted p-4">
+            <h3 className="text-sm font-medium flex items-center gap-2">
+              <Users className="h-4 w-4 icon-brand" />
+              Adicionar de outro projeto seu
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Pessoas que já participam de outro projeto familiar seu — sem novo convite.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="network-member">Pessoa</Label>
+                <Select value={selectedUserId} onValueChange={(v) => v && setSelectedUserId(v)}>
+                  <SelectTrigger id="network-member" className="w-full bg-card border-border">
+                    <SelectValue placeholder="Escolha alguém…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {networkCollaborators.map((c) => (
+                      <SelectItem key={c.userId} value={c.userId}>
+                        {c.label}
+                        {c.email ? ` (${c.email})` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="network-role">Papel neste projeto</Label>
+                <Select value={addRole} onValueChange={(v) => v && setAddRole(v as InviteRole)}>
+                  <SelectTrigger id="network-role" className="w-full bg-card border-border">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLES.map((r) => (
+                      <SelectItem key={r} value={r}>
+                        {inviteRoleLabel(r)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <Button
+              type="button"
+              disabled={addPending || !selectedUserId}
+              onClick={handleAddExisting}
+              className="btn-primary-gradient rounded-full px-6 h-11 text-base font-semibold"
+            >
+              {addPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Adicionando…
+                </>
+              ) : (
+                <>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Adicionar ao projeto
+                </>
+              )}
+            </Button>
+          </div>
+        )}
+
         {people.length > 0 ? (
           <ul className="space-y-2">
             {people.map((person) => (
@@ -272,8 +379,14 @@ export function ProjectPeoplePanel({
                     ? () => handleResendLogin(person.userId!, person.label)
                     : undefined
                 }
+                onRemove={
+                  isOwner && person.kind === 'member'
+                    ? () => handleRemoveMember(person.id, person.label)
+                    : undefined
+                }
                 revokeDisabled={revokePending}
                 resendDisabled={resendPending}
+                removeDisabled={removePending}
               />
             ))}
           </ul>
@@ -296,15 +409,19 @@ function PersonRow({
   onCopy,
   onRevoke,
   onResendLogin,
+  onRemove,
   revokeDisabled,
   resendDisabled,
+  removeDisabled,
 }: {
   person: ProjectPersonRow
   onCopy?: () => void
   onRevoke?: () => void
   onResendLogin?: () => void
+  onRemove?: () => void
   revokeDisabled?: boolean
   resendDisabled?: boolean
+  removeDisabled?: boolean
 }) {
   const statusClass =
     person.status === 'active'
@@ -363,6 +480,19 @@ function PersonRow({
           >
             <Send className="h-4 w-4 mr-1" />
             Reenviar entrada
+          </Button>
+        )}
+        {onRemove && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="text-destructive border-destructive/30 hover:bg-destructive/10"
+            onClick={onRemove}
+            disabled={removeDisabled}
+          >
+            <UserMinus className="h-4 w-4 mr-1" />
+            Remover
           </Button>
         )}
         {onCopy && onRevoke && (

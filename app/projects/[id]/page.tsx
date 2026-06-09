@@ -8,6 +8,7 @@ import { PhotoGallery } from '@/components/photos/photo-gallery'
 import { PhotoUploadPanel } from '@/components/photos/photo-upload-panel'
 import { ProjectPeoplePanel } from '@/components/invites/project-people-panel'
 import { OptionalPhoneCard } from '@/components/profile/optional-phone-card'
+import { listOwnerNetworkCollaborators } from '@/lib/collaborators/network-queries'
 import { canManageInvites } from '@/lib/invites/permissions'
 import { listProjectPeople } from '@/lib/invites/people-queries'
 import { DeleteProjectButton } from '@/components/projects/delete-project-button'
@@ -49,9 +50,10 @@ export default async function ProjectDetailPage({ params, searchParams }: PagePr
   const origin = host ? `${proto}://${host}` : undefined
 
   const showPeople = canManageInvites(access)
-  const [photos, people, profileRow] = await Promise.all([
+  const [photos, people, networkCollaborators, profileRow] = await Promise.all([
     getGalleryPhotos(project.id, { includeUnapproved: isOwner }),
     showPeople ? listProjectPeople(project.id, user.id, origin) : Promise.resolve([]),
+    isOwner ? listOwnerNetworkCollaborators(user.id, project.id) : Promise.resolve([]),
     (async () => {
       const supabase = await createClient()
       const { data } = await supabase
@@ -137,6 +139,8 @@ export default async function ProjectDetailPage({ params, searchParams }: PagePr
               projectId={project.id}
               people={people}
               hasServiceKey={hasServiceKey}
+              isOwner={isOwner}
+              networkCollaborators={networkCollaborators}
             />
           )}
 
