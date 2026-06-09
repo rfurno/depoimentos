@@ -110,6 +110,11 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
               Você foi convidado(a) para participar de
             </CardDescription>
             <p className="text-xl font-semibold text-foreground pt-1">{preview.projectTitle}</p>
+            {preview.inviteeName && (
+              <p className="text-sm text-muted-foreground pt-1">
+                Olá, <span className="font-medium text-foreground">{preview.inviteeName}</span>
+              </p>
+            )}
           </CardHeader>
 
           <CardContent className="space-y-5">

@@ -21,6 +21,7 @@ export interface Database {
           id: string
           full_name: string | null
           avatar_url: string | null
+          phone: string | null
           created_at: string
           updated_at: string
         }
@@ -28,6 +29,7 @@ export interface Database {
           id: string
           full_name?: string | null
           avatar_url?: string | null
+          phone?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -35,6 +37,7 @@ export interface Database {
           id?: string
           full_name?: string | null
           avatar_url?: string | null
+          phone?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -73,6 +76,7 @@ export interface Database {
           project_id: string
           user_id: string
           role: string
+          invite_id: string | null
           created_at: string
         }
         Insert: {
@@ -80,6 +84,7 @@ export interface Database {
           project_id: string
           user_id: string
           role: string
+          invite_id?: string | null
           created_at?: string
         }
         Update: {
@@ -87,6 +92,7 @@ export interface Database {
           project_id?: string
           user_id?: string
           role?: string
+          invite_id?: string | null
           created_at?: string
         }
         Relationships: []
@@ -159,6 +165,8 @@ export interface Database {
           id: string
           project_id: string
           token: string
+          invitee_name: string | null
+          invitee_phone: string | null
           email: string | null
           role: string
           expires_at: string
@@ -171,6 +179,8 @@ export interface Database {
           id?: string
           project_id: string
           token?: string
+          invitee_name?: string | null
+          invitee_phone?: string | null
           email?: string | null
           role: string
           expires_at: string
@@ -183,6 +193,8 @@ export interface Database {
           id?: string
           project_id?: string
           token?: string
+          invitee_name?: string | null
+          invitee_phone?: string | null
           email?: string | null
           role?: string
           expires_at?: string
@@ -201,6 +213,7 @@ export interface Database {
           p_token: string
           p_user_id: string
           p_user_email: string
+          p_phone?: string
         }
         Returns: Json
       }

@@ -6,15 +6,19 @@ import { ArrowLeft, Pencil, Settings } from 'lucide-react'
 import { AppShell } from '@/components/layout/app-shell'
 import { PhotoGallery } from '@/components/photos/photo-gallery'
 import { PhotoUploadPanel } from '@/components/photos/photo-upload-panel'
-import { ProjectInvitesPanel } from '@/components/invites/project-invites-panel'
+import { ProjectPeoplePanel } from '@/components/invites/project-people-panel'
+import { OptionalPhoneCard } from '@/components/profile/optional-phone-card'
+import { canManageInvites } from '@/lib/invites/permissions'
+import { listProjectPeople } from '@/lib/invites/people-queries'
 import { DeleteProjectButton } from '@/components/projects/delete-project-button'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { requireUser } from '@/lib/auth/server'
+import { createClient } from '@/lib/supabase/server'
 import { getGalleryPhotos } from '@/lib/photos/queries'
 import { canUploadPhotos } from '@/lib/photos/permissions'
 import { roleLabel } from '@/lib/projects/labels'
-import { listProjectInvites } from '@/lib/invites/queries'
+
 import { getDisplayName, getProjectAccess } from '@/lib/projects/queries'
 import { headers } from 'next/headers'
 
@@ -22,10 +26,12 @@ export const dynamic = 'force-dynamic'
 
 type PageProps = {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ onboard?: string }>
 }
 
-export default async function ProjectDetailPage({ params }: PageProps) {
+export default async function ProjectDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params
+  const { onboard } = await searchParams
   const user = await requireUser()
   const [displayName, access] = await Promise.all([
     getDisplayName(user.id, user.email),
@@ -42,10 +48,22 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   const proto = h.get('x-forwarded-proto') ?? 'http'
   const origin = host ? `${proto}://${host}` : undefined
 
-  const [photos, invites] = await Promise.all([
+  const showPeople = canManageInvites(access)
+  const [photos, people, profileRow] = await Promise.all([
     getGalleryPhotos(project.id, { includeUnapproved: isOwner }),
-    isOwner ? listProjectInvites(project.id, user.id, origin) : Promise.resolve([]),
+    showPeople ? listProjectPeople(project.id, user.id, origin) : Promise.resolve([]),
+    (async () => {
+      const supabase = await createClient()
+      const { data } = await supabase
+        .from('profiles')
+        .select('phone')
+        .eq('id', user.id)
+        .maybeSingle()
+      return data
+    })(),
   ])
+  const showOptionalPhone =
+    onboard === 'contact' && !isOwner && !profileRow?.phone?.trim()
   const showUpload = canUploadPhotos(role)
   const hasServiceKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)
 
@@ -112,10 +130,12 @@ export default async function ProjectDetailPage({ params }: PageProps) {
         )}
 
         <section className="mt-10 space-y-8">
-          {isOwner && (
-            <ProjectInvitesPanel
+          {showOptionalPhone && <OptionalPhoneCard projectId={project.id} />}
+
+          {showPeople && (
+            <ProjectPeoplePanel
               projectId={project.id}
-              invites={invites}
+              people={people}
               hasServiceKey={hasServiceKey}
             />
           )}

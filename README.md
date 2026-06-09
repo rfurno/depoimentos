@@ -370,6 +370,7 @@ on conflict (id) do nothing;
 6. `comments-mutate-policies.sql` + `comments-owner-delete-policy.sql` — edição/remoção de comentários
 7. `project-invites-revoke-anon-select.sql` — remove SELECT anônimo amplo em convites
 8. `redeem-project-invite.sql` — resgate atômico de convites + vínculo de e-mail quando preenchido
+9. `invite-people-phase1.sql` — nome/telefone no convite, telefone opcional no perfil, painel de pessoas, admins
 
 **Storage (alternativa ao passo 3):** `storage-upload-policy.sql`, `storage-read-policy.sql`, `storage-delete-policy.sql`. Se política SELECT já existir (erro `42710`), execute `storage-reset-select-policy.sql` antes de recriar.
 

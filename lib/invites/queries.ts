@@ -9,6 +9,7 @@ export type InvitePreview = {
   projectId: string
   projectTitle: string
   role: InviteRole
+  inviteeName: string | null
   email: string | null
   expiresAt: string
   isExpired: boolean
@@ -42,7 +43,7 @@ export async function getInvitePreview(token: string): Promise<InvitePreview | n
 
   const { data: invite, error } = await admin
     .from('project_invites')
-    .select('token, project_id, role, email, expires_at, redeemed_at')
+    .select('token, project_id, role, invitee_name, email, expires_at, redeemed_at')
     .eq('token', tokenUuid)
     .maybeSingle()
 
@@ -63,6 +64,7 @@ export async function getInvitePreview(token: string): Promise<InvitePreview | n
     projectId: invite.project_id,
     projectTitle: project.title,
     role: invite.role as InviteRole,
+    inviteeName: invite.invitee_name,
     email: invite.email,
     expiresAt: invite.expires_at,
     isExpired: status.isExpired,
@@ -93,7 +95,7 @@ export async function listProjectInvites(
   const { data: invites } = await supabase
     .from('project_invites')
     .select(
-      'id, project_id, token, email, role, expires_at, redeemed_at, redeemed_by, created_by, created_at'
+      'id, project_id, token, invitee_name, invitee_phone, email, role, expires_at, redeemed_at, redeemed_by, created_by, created_at'
     )
     .eq('project_id', id)
     .order('created_at', { ascending: false })

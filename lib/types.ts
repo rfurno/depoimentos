@@ -74,6 +74,8 @@ export interface ProjectInvite {
   id: string
   project_id: string
   token: string // uuid
+  invitee_name: string | null
+  invitee_phone: string | null
   email: string | null // optional prefill
   role: InviteRole
   expires_at: string

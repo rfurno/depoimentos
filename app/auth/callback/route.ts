@@ -50,7 +50,16 @@ export async function GET(request: NextRequest) {
     if (user) {
       const result = await redeemProjectInvite(inviteToken, user.id, user.email)
       if (result.projectId) {
-        return NextResponse.redirect(`${origin}/projects/${result.projectId}`)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('phone')
+          .eq('id', user.id)
+          .maybeSingle()
+        const onboard =
+          profile?.phone?.trim() ? '' : '?onboard=contact'
+        return NextResponse.redirect(
+          `${origin}/projects/${result.projectId}${onboard}`
+        )
       }
       const inviteError = encodeURIComponent(result.error ?? 'Não foi possível aceitar o convite.')
       return NextResponse.redirect(`${origin}/invite/${inviteToken}?error=${inviteError}`)

@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { projectMutationError } from '@/lib/supabase/errors'
+import { normalizeOptionalPhone } from '@/lib/validation/phone'
 import { parseUuid } from '@/lib/validation/uuid'
 
 export type RedeemInviteResult = {
@@ -13,7 +14,7 @@ const SERVICE_KEY_MSG =
   'Configure SUPABASE_SERVICE_ROLE_KEY em .env.local para aceitar convites (necessário para adicionar colaboradores).'
 
 const RPC_MISSING_MSG =
-  'Execute supabase/redeem-project-invite.sql no SQL Editor do Supabase para aceitar convites.';
+  'Execute supabase/invite-people-phase1.sql no SQL Editor do Supabase para aceitar convites.';
 
 type RedeemRpcResult = {
   error?: string
@@ -26,11 +27,17 @@ type RedeemRpcResult = {
 export async function redeemProjectInvite(
   token: string,
   userId: string,
-  userEmail: string | null | undefined
+  userEmail: string | null | undefined,
+  phone?: string | null
 ): Promise<RedeemInviteResult> {
   const tokenUuid = parseUuid(token)
   if (!tokenUuid) {
     return { error: 'Link de convite inválido.' }
+  }
+
+  const normalizedPhone = phone ? normalizeOptionalPhone(phone) : null
+  if (phone?.trim() && !normalizedPhone) {
+    return { error: 'Telefone inválido. Use formato internacional, ex: +5511999999999.' }
   }
 
   const admin = createAdminClient()
@@ -42,6 +49,7 @@ export async function redeemProjectInvite(
     p_token: tokenUuid,
     p_user_id: userId,
     p_user_email: userEmail ?? '',
+    p_phone: normalizedPhone ?? '',
   })
 
   if (error) {
