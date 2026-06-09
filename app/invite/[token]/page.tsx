@@ -123,8 +123,9 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
             {preview.email && (
               <p className="text-sm text-center text-muted-foreground flex items-center justify-center gap-2">
                 <Mail className="h-4 w-4 shrink-0" />
-                Convite enviado para{' '}
+                Entre com{' '}
                 <span className="font-medium text-foreground">{preview.email}</span>
+                {' '}para aceitar este convite
               </p>
             )}
 

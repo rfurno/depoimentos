@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     if (user) {
-      const result = await redeemProjectInvite(inviteToken, user.id)
+      const result = await redeemProjectInvite(inviteToken, user.id, user.email)
       if (result.projectId) {
         return NextResponse.redirect(`${origin}/projects/${result.projectId}`)
       }

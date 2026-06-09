@@ -152,7 +152,7 @@ export function ProjectInvitesPanel({
                 <p className="text-sm text-destructive">{state.fieldErrors.email[0]}</p>
               )}
               <p className="text-xs text-muted-foreground">
-                Só uma dica na tela do convite — qualquer e-mail pode aceitar.
+                Se preenchido, só quem entrar com este e-mail poderá aceitar o convite.
               </p>
             </div>
 

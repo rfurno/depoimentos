@@ -43,7 +43,7 @@ export async function getProjectsForUser(userId: string): Promise<ProjectWithRol
     byId.set(row.id, { ...row, role: 'owner' })
   }
 
-  for (const row of (memberships ?? []) as CollaboratorRow[]) {
+  for (const row of (memberships ?? []) as unknown as CollaboratorRow[]) {
     const project = row.projects
     if (!project || byId.has(project.id)) continue
     byId.set(project.id, { ...project, role: row.role })

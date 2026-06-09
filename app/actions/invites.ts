@@ -124,7 +124,7 @@ export async function acceptProjectInvite(
 
   if (!user) return { error: 'Você precisa estar conectado.' }
 
-  const result = await redeemProjectInvite(token, user.id)
+  const result = await redeemProjectInvite(token, user.id, user.email)
   if (result.error) {
     return {
       error: result.error,

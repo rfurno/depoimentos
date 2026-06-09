@@ -42,7 +42,7 @@ export async function getGalleryPhotos(
     return []
   }
 
-  const rows = (data ?? []) as PhotoRow[]
+  const rows = (data ?? []) as unknown as PhotoRow[]
   const normalized: Photo[] = rows.map((row) => ({
     id: row.id,
     project_id: row.project_id,

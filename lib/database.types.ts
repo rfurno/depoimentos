@@ -195,7 +195,16 @@ export interface Database {
       }
     }
     Views: { [key: string]: never }
-    Functions: { [key: string]: never }
+    Functions: {
+      redeem_project_invite: {
+        Args: {
+          p_token: string
+          p_user_id: string
+          p_user_email: string
+        }
+        Returns: Json
+      }
+    }
     Enums: { [key: string]: never }
   }
 }

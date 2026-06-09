@@ -147,17 +147,17 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    Start[Clica no link do convite<br/>/invite/token] --> Valid{Convite válido?}
+    Start[Clica no link do convite<br/> /invite /token] --> Valid{Convite válido?}
 
     Valid -->|Não| Expired[Mostrar: Convite expirado ou já usado]
     Valid -->|Sim| Logged{Usuário logado?}
 
     Logged -->|Não| Login[Tela: Entrar e Aceitar Convite]
     Login --> Magic[Envia Magic Link<br/>com invite token no redirect]
-    Magic --> Callback[/auth/callback?invite=token]
+    Magic --> Callback[/auth /callback?invite=token]
     Callback --> AutoAccept[Auto-aceitar convite]
     AutoAccept --> AddMember[Adicionar como colaborador]
-    AddMember --> Project["/projects/id — direto ao projeto"]
+    AddMember --> Project["/projects /id — direto ao projeto"]
 
     Logged -->|Sim| Member{É membro do projeto?}
     Member -->|Sim| Project
@@ -178,7 +178,7 @@ flowchart TD
 | **Convite inválido** | 404, expirado ou já usado |
 | **Falha no auto-aceite** | Retorno a `/invite/{token}?error=...` com mensagem |
 
-**Implementação:** o resgate usa `redeemProjectInvite` no callback de auth (server-side, service role). Quem já está logado continua com aceite explícito via `InviteAcceptForm` — evita surpresas em contas já abertas.
+**Implementação:** resgate atômico via RPC `redeem_project_invite` (service role). Se o dono preencheu e-mail no convite, só esse endereço pode aceitar. Quem já está logado continua com aceite explícito via `InviteAcceptForm`.
 
 Após aceite: linha em `project_collaborators` com o papel do convite; sessão persiste para visitas futuras.
 

@@ -366,9 +366,10 @@ on conflict (id) do nothing;
 2. `profile-display-name.sql` — nomes de exibição amigáveis nos comentários
 3. `storage-policies.sql` — políticas completas do bucket `photos` (ou os arquivos separados abaixo)
 4. `storage-approved-select-policy.sql` — leitores só veem fotos aprovadas no storage
-5. `comments-approved-policy.sql` — comentários só em fotos aprovadas (não-donos)
+5. `comments-approved-policy.sql` — comentários (SELECT + INSERT) só em fotos aprovadas para não-donos
 6. `comments-mutate-policies.sql` + `comments-owner-delete-policy.sql` — edição/remoção de comentários
 7. `project-invites-revoke-anon-select.sql` — remove SELECT anônimo amplo em convites
+8. `redeem-project-invite.sql` — resgate atômico de convites + vínculo de e-mail quando preenchido
 
 **Storage (alternativa ao passo 3):** `storage-upload-policy.sql`, `storage-read-policy.sql`, `storage-delete-policy.sql`. Se política SELECT já existir (erro `42710`), execute `storage-reset-select-policy.sql` antes de recriar.
 
@@ -509,7 +510,7 @@ Vercel + Supabase é uma excelente combinação — edge functions, imagens ráp
 - Rotas protegidas por middleware + `getUser()` no servidor
 - RLS do Supabase como fonte da verdade; helpers `is_project_*` evitam recursão
 - Bucket `photos` privado; imagens via signed URLs geradas no servidor
-- Convites: auto-aceite no `/auth/callback?invite=…` após magic link; aceite manual (POST) se já logado; resgate atômico `WHERE redeemed_at IS NULL`
+- Convites: auto-aceite no `/auth/callback?invite=…` após magic link; aceite manual (POST) se já logado; RPC `redeem_project_invite` (transação atômica); e-mail do convite obrigatório quando preenchido
 - Export: limite de fotos/tamanho + rate limit por usuário
 - Comentários em fotos não aprovadas bloqueados para não-donos
 - `project_invites`: SELECT anônimo amplo revogado; lookup por token no servidor
