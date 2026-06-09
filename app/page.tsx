@@ -103,14 +103,6 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Trust / mobile note */}
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10 sm:py-14 text-center text-muted-foreground">
-        <p className="text-sm">
-          Construído com Supabase para autenticação e armazenamento sólidos. Prioridade mobile. Apresentações amigáveis ao polegar.
-          Nenhum dado sai do projeto privado da sua família a menos que você exporte.
-        </p>
-      </div>
-
       {/* CTA footer */}
       <div className="border-t border-border bg-card">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-12 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -120,7 +112,7 @@ export default function LandingPage() {
           </div>
           <Link href="/login">
             <Button className="btn-primary-gradient rounded-full px-8 h-12 text-base font-semibold">
-              Crie seu primeiro Storyloom
+              Crie seu primeiro projeto familiar
             </Button>
           </Link>
         </div>
