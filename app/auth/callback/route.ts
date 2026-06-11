@@ -4,15 +4,30 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getSupabaseConfig } from '@/lib/env'
 import { parseInviteToken, sanitizeRedirectPath } from '@/lib/auth/safe-redirect'
+import {
+  PENDING_INVITE_COOKIE,
+  readPendingInviteCookie,
+} from '@/lib/auth/invite-cookie'
 import { redeemProjectInvite } from '@/lib/invites/redeem'
 import type { Database } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
+type SessionCookie = {
+  name: string
+  value: string
+  options?: Parameters<NextResponse['cookies']['set']>[2]
+}
+
+function attachSessionCookies(response: NextResponse, sessionCookies: SessionCookie[]) {
+  sessionCookies.forEach(({ name, value, options }) => {
+    response.cookies.set(name, value, options)
+  })
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
-  const redirectTo = sanitizeRedirectPath(searchParams.get('redirectTo'))
   const origin = request.nextUrl.origin
 
   if (!code) {
@@ -21,7 +36,7 @@ export async function GET(request: NextRequest) {
 
   const { url, anonKey } = getSupabaseConfig()
   const cookieStore = await cookies()
-  const redirectResponse = NextResponse.redirect(`${origin}${redirectTo}`)
+  const sessionCookies: SessionCookie[] = []
 
   const supabase = createServerClient<Database>(url, anonKey, {
     cookies: {
@@ -29,8 +44,9 @@ export async function GET(request: NextRequest) {
         return cookieStore.getAll()
       },
       setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) => {
-          redirectResponse.cookies.set(name, value, options)
+        cookiesToSet.forEach((cookie) => {
+          sessionCookies.push(cookie)
+          cookieStore.set(cookie.name, cookie.value, cookie.options)
         })
       },
     },
@@ -41,7 +57,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?error=auth_failed`)
   }
 
-  const inviteToken = parseInviteToken(searchParams.get('invite'))
+  let destination = sanitizeRedirectPath(searchParams.get('redirectTo'))
+
+  const inviteToken =
+    parseInviteToken(searchParams.get('invite')) ??
+    parseInviteToken(
+      readPendingInviteCookie(cookieStore.get(PENDING_INVITE_COOKIE)?.value)
+    )
+
   if (inviteToken) {
     const {
       data: { user },
@@ -55,16 +78,19 @@ export async function GET(request: NextRequest) {
           .select('phone')
           .eq('id', user.id)
           .maybeSingle()
-        const onboard =
-          profile?.phone?.trim() ? '' : '?onboard=contact'
-        return NextResponse.redirect(
-          `${origin}/projects/${result.projectId}${onboard}`
+        const onboard = profile?.phone?.trim() ? '' : '?onboard=contact'
+        destination = `/projects/${result.projectId}${onboard}`
+      } else {
+        const inviteError = encodeURIComponent(
+          result.error ?? 'Não foi possível aceitar o convite.'
         )
+        destination = `/invite/${inviteToken}?error=${inviteError}`
       }
-      const inviteError = encodeURIComponent(result.error ?? 'Não foi possível aceitar o convite.')
-      return NextResponse.redirect(`${origin}/invite/${inviteToken}?error=${inviteError}`)
     }
   }
 
-  return redirectResponse
+  const response = NextResponse.redirect(`${origin}${destination}`)
+  attachSessionCookies(response, sessionCookies)
+  response.cookies.delete(PENDING_INVITE_COOKIE)
+  return response
 }

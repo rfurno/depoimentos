@@ -14,6 +14,7 @@ import {
 import { canManageInvites } from '@/lib/invites/permissions'
 import { checkResendLoginRateLimit } from '@/lib/invites/resend-login-rate-limit'
 import { redeemProjectInvite } from '@/lib/invites/redeem'
+import { resolveAppOrigin } from '@/lib/auth/app-origin'
 import { getProjectAccess } from '@/lib/projects/queries'
 import { normalizeOptionalPhone } from '@/lib/validation/phone'
 import { parseUuid } from '@/lib/validation/uuid'
@@ -66,12 +67,6 @@ async function getRequestOrigin(): Promise<string | undefined> {
   const proto = h.get('x-forwarded-proto') ?? 'http'
   if (!host) return undefined
   return `${proto}://${host}`
-}
-
-function getAppOrigin(origin?: string): string {
-  const configured = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')
-  if (configured) return configured
-  return origin?.replace(/\/$/, '') ?? 'http://localhost:3000'
 }
 
 async function assertCanManageInvites(projectId: string, userId: string) {
@@ -279,7 +274,7 @@ export async function resendMemberLoginLink(
     return { error: 'Não foi possível obter o e-mail deste membro.' }
   }
 
-  const origin = getAppOrigin(await getRequestOrigin())
+  const origin = resolveAppOrigin(await getRequestOrigin())
   const { error: otpError } = await admin.auth.signInWithOtp({
     email,
     options: {

@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Mail, Loader2, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { setPendingInviteCookie } from "@/lib/auth/invite-cookie";
 import {
   inviteTokenFromPath,
   parseInviteToken,
@@ -58,9 +59,11 @@ export function LoginForm() {
         throw new Error("Configuração do Supabase ausente. Copie .env.example para .env.local, preencha as chaves e reinicie o servidor.");
       }
 
-      // Use canonical app URL from env when set (recommended for production + Supabase dashboard config).
-      // Falls back to current origin for local/dev. Always configure the exact URL(s) in Supabase Auth settings.
-      const appOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+      // PKCE verifier is stored on this origin — callback must use the same host or exchange fails.
+      const appOrigin = window.location.origin
+      if (inviteToken) {
+        setPendingInviteCookie(inviteToken)
+      }
       const callbackUrl = inviteToken
         ? `${appOrigin}/auth/callback?invite=${encodeURIComponent(inviteToken)}`
         : `${appOrigin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`
