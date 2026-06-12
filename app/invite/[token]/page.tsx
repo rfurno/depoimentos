@@ -1,13 +1,15 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Users, Mail, ArrowRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getInvitePreview } from '@/lib/invites/queries'
+import { redeemProjectInvite } from '@/lib/invites/redeem'
 import { getProjectAccess } from '@/lib/projects/queries'
 import { inviteRoleShortLabel } from '@/lib/invites/labels'
 import { InviteAcceptForm } from '@/components/invites/invite-accept-form'
+import { InviteMagicLinkForm } from '@/components/invites/invite-magic-link-form'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -42,7 +44,6 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
   } = await supabase.auth.getUser()
 
   const invitePath = `/invite/${preview.token}`
-  const loginHref = `/login?invite=${encodeURIComponent(preview.token)}`
 
   let statusMessage: string | null = null
   let statusVariant: 'muted' | 'error' = 'muted'
@@ -50,6 +51,7 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
   let loggedInAsOwner = false
   let alreadyMember = false
   let showAcceptForm = false
+  let redeemError: string | null = inviteError ? decodeQueryError(inviteError) : null
 
   if (preview.isExpired) {
     statusMessage = 'Este convite expirou. Peça um novo link ao proprietário do projeto.'
@@ -69,8 +71,19 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
       alreadyMember = true
       statusMessage = 'Você já participa deste projeto.'
       projectLinkId = preview.projectId
-    } else {
-      showAcceptForm = preview.canRedeem
+    } else if (preview.canRedeem) {
+      const result = await redeemProjectInvite(preview.token, user.id, user.email)
+      if (result.projectId && !result.error) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('phone')
+          .eq('id', user.id)
+          .maybeSingle()
+        const onboard = profile?.phone?.trim() ? '' : '?onboard=contact'
+        redirect(`/projects/${result.projectId}${onboard}`)
+      }
+      redeemError = result.error ?? redeemError
+      showAcceptForm = true
     }
   }
 
@@ -78,7 +91,7 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
     locale: ptBR,
   })
 
-  const showLoginCta = !user && preview.canRedeem
+  const showMagicLinkForm = !user && preview.canRedeem
 
   return (
     <div className="min-h-screen hero-gradient flex flex-col">
@@ -125,18 +138,17 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
               <span className="text-xs text-muted-foreground self-center">Válido até {expiresLabel}</span>
             </div>
 
-            {preview.email && (
+            {preview.email && showMagicLinkForm && (
               <p className="text-sm text-center text-muted-foreground flex items-center justify-center gap-2">
                 <Mail className="h-4 w-4 shrink-0" />
-                Entre com{' '}
+                Convite para{' '}
                 <span className="font-medium text-foreground">{preview.email}</span>
-                {' '}para aceitar este convite
               </p>
             )}
 
-            {inviteError && (
+            {redeemError && (
               <p className="text-sm rounded-lg px-4 py-3 border text-destructive bg-destructive/10 border-destructive/20">
-                {decodeQueryError(inviteError)}
+                {redeemError}
               </p>
             )}
 
@@ -172,23 +184,8 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
 
             {showAcceptForm && <InviteAcceptForm token={token} />}
 
-            {showLoginCta && (
-              <div className="space-y-3 pt-2">
-                <p className="text-sm text-center text-muted-foreground">
-                  Entre com seu e-mail (link mágico, sem senha). Após clicar no link, você será
-                  adicionado ao projeto automaticamente.
-                </p>
-                <Link
-                  href={loginHref}
-                  className={buttonVariants({
-                    className:
-                      'w-full h-12 btn-primary-gradient rounded-full font-semibold text-base',
-                  })}
-                >
-                  Entrar e aceitar convite
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </div>
+            {showMagicLinkForm && (
+              <InviteMagicLinkForm token={preview.token} suggestedEmail={preview.email} />
             )}
 
             {(projectLinkId || alreadyMember) && (

@@ -27,7 +27,11 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-export function LoginForm() {
+type LoginFormProps = {
+  suggestedEmail?: string | null;
+};
+
+export function LoginForm({ suggestedEmail }: LoginFormProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [sentTo, setSentTo] = useState("");
@@ -40,11 +44,12 @@ export function LoginForm() {
   const isInviteFlow = Boolean(inviteToken);
   const errorParam = searchParams.get("error");
   const isConfigError = errorParam === 'supabase_not_configured';
+  const emailLocked = Boolean(suggestedEmail?.trim() && isInviteFlow);
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      email: suggestedEmail?.trim() ?? "",
     },
   });
 
@@ -206,8 +211,9 @@ export function LoginForm() {
               className="h-12 bg-card border-border text-base"
               {...form.register("email")}
               disabled={isLoading}
+              readOnly={emailLocked}
               autoComplete="email"
-              autoFocus
+              autoFocus={!emailLocked}
             />
             {form.formState.errors.email && (
               <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>

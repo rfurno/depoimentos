@@ -1,9 +1,18 @@
 import Link from "next/link";
 import { Heart, ArrowLeft } from "lucide-react";
 import { Suspense } from "react";
+import { getInvitePreview } from "@/lib/invites/queries";
+import { parseInviteToken } from "@/lib/auth/safe-redirect";
 import { LoginForm } from "./login-form";
 
-export default function LoginPage() {
+type PageProps = {
+  searchParams: Promise<{ invite?: string }>;
+};
+
+export default async function LoginPage({ searchParams }: PageProps) {
+  const { invite: inviteParam } = await searchParams;
+  const inviteToken = parseInviteToken(inviteParam);
+  const invitePreview = inviteToken ? await getInvitePreview(inviteToken) : null;
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="w-full max-w-md">
@@ -23,7 +32,7 @@ export default function LoginPage() {
             </div>
           }
         >
-          <LoginForm />
+          <LoginForm suggestedEmail={invitePreview?.email} />
         </Suspense>
 
         <div className="mt-6 text-center">
