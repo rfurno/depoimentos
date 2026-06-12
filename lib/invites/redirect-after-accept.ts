@@ -1,9 +1,11 @@
-import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
-/** Send an authenticated collaborator straight to the project after invite accept. */
-export async function redirectToProjectAfterInvite(userId: string, projectId: string) {
+/** Project URL after invite accept (safe to call during page render). */
+export async function projectRedirectPathAfterInvite(
+  userId: string,
+  projectId: string
+): Promise<string> {
   const supabase = await createClient()
   const { data: profile } = await supabase
     .from('profiles')
@@ -12,6 +14,10 @@ export async function redirectToProjectAfterInvite(userId: string, projectId: st
     .maybeSingle()
 
   const onboard = profile?.phone?.trim() ? '' : '?onboard=contact'
-  revalidatePath(`/projects/${projectId}`)
-  redirect(`/projects/${projectId}${onboard}`)
+  return `/projects/${projectId}${onboard}`
+}
+
+/** Redirect an authenticated collaborator to the project (no cache revalidation). */
+export async function redirectToProjectAfterInvite(userId: string, projectId: string) {
+  redirect(await projectRedirectPathAfterInvite(userId, projectId))
 }

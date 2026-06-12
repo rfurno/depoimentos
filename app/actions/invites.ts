@@ -218,6 +218,7 @@ export async function acceptInviteWithLogin(
   }
 
   if (result.projectId) {
+    revalidatePath(`/projects/${result.projectId}`)
     await redirectToProjectAfterInvite(login.userId, result.projectId)
   }
 
@@ -254,6 +255,7 @@ export async function acceptProjectInvite(
   }
 
   if (result.projectId) {
+    revalidatePath(`/projects/${result.projectId}`)
     await redirectToProjectAfterInvite(user.id, result.projectId)
   }
 
