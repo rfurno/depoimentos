@@ -14,6 +14,8 @@ import {
 import { canManageInvites } from '@/lib/invites/permissions'
 import { checkResendLoginRateLimit } from '@/lib/invites/resend-login-rate-limit'
 import { redeemProjectInvite } from '@/lib/invites/redeem'
+import { getInvitePreview } from '@/lib/invites/queries'
+import { establishSessionViaInviteMagicLink } from '@/lib/auth/invite-login'
 import { resolveAppOrigin } from '@/lib/auth/app-origin'
 import { getProjectAccess } from '@/lib/projects/queries'
 import { normalizeOptionalPhone } from '@/lib/validation/phone'
@@ -156,6 +158,54 @@ export async function createProjectInvite(
 
   revalidatePath(`/projects/${manage.projectUuid}`)
   return { inviteUrl }
+}
+
+/** Log in (no extra email) and redeem invite for visitors who are not signed in yet. */
+export async function acceptInviteWithLogin(
+  token: string,
+  _prev: AcceptInviteState,
+  formData?: FormData
+): Promise<AcceptInviteState> {
+  const tokenUuid = parseUuid(token)
+  if (!tokenUuid) return { error: 'Link de convite inválido.' }
+
+  const preview = await getInvitePreview(token)
+  if (!preview) return { error: 'Convite não encontrado.' }
+  if (!preview.canRedeem) {
+    if (preview.isExpired) return { error: 'Este convite expirou.' }
+    if (preview.isRedeemed) return { error: 'Este convite já foi utilizado.' }
+    return { error: 'Este convite não está mais disponível.' }
+  }
+
+  const formEmail = formData?.get('email')?.toString().trim()
+  const email = preview.email ?? formEmail
+  if (!email) return { error: 'Informe seu e-mail para continuar.' }
+
+  if (preview.email && preview.email.toLowerCase() !== email.toLowerCase()) {
+    return { error: 'Este convite é para outro e-mail.' }
+  }
+
+  const origin = resolveAppOrigin(await getRequestOrigin())
+  const callbackUrl = `${origin}/auth/callback?invite=${encodeURIComponent(token)}`
+
+  const login = await establishSessionViaInviteMagicLink(email, callbackUrl)
+  if (login.error || !login.userId) {
+    return { error: login.error ?? 'Não foi possível entrar.' }
+  }
+
+  const phone =
+    formData?.get('phone') != null ? String(formData.get('phone')) : undefined
+
+  const result = await redeemProjectInvite(token, login.userId, login.userEmail, phone)
+  if (result.error) {
+    return { error: result.error, projectId: result.projectId }
+  }
+
+  if (result.projectId) {
+    revalidatePath(`/projects/${result.projectId}`)
+  }
+
+  return { projectId: result.projectId }
 }
 
 export async function acceptProjectInvite(
