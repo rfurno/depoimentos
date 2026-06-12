@@ -17,6 +17,7 @@ import { redeemProjectInvite } from '@/lib/invites/redeem'
 import { getInvitePreview } from '@/lib/invites/queries'
 import { establishSessionViaInviteMagicLink } from '@/lib/auth/invite-login'
 import { resolveAppOrigin } from '@/lib/auth/app-origin'
+import { redirectToProjectAfterInvite } from '@/lib/invites/redirect-after-accept'
 import { getProjectAccess } from '@/lib/projects/queries'
 import { normalizeOptionalPhone } from '@/lib/validation/phone'
 import { parseUuid } from '@/lib/validation/uuid'
@@ -173,7 +174,19 @@ export async function acceptInviteWithLogin(
   if (!preview) return { error: 'Convite não encontrado.' }
   if (!preview.canRedeem) {
     if (preview.isExpired) return { error: 'Este convite expirou.' }
-    if (preview.isRedeemed) return { error: 'Este convite já foi utilizado.' }
+    if (preview.isRedeemed) {
+      const supabase = await createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (user) {
+        const access = await getProjectAccess(preview.projectId, user.id)
+        if (access) {
+          await redirectToProjectAfterInvite(user.id, preview.projectId)
+        }
+      }
+      return { error: 'Este convite já foi utilizado.' }
+    }
     return { error: 'Este convite não está mais disponível.' }
   }
 
@@ -198,14 +211,17 @@ export async function acceptInviteWithLogin(
 
   const result = await redeemProjectInvite(token, login.userId, login.userEmail, phone)
   if (result.error) {
+    if (result.alreadyMember && result.projectId) {
+      await redirectToProjectAfterInvite(login.userId, result.projectId)
+    }
     return { error: result.error, projectId: result.projectId }
   }
 
   if (result.projectId) {
-    revalidatePath(`/projects/${result.projectId}`)
+    await redirectToProjectAfterInvite(login.userId, result.projectId)
   }
 
-  return { projectId: result.projectId }
+  return { error: 'Não foi possível aceitar o convite.' }
 }
 
 export async function acceptProjectInvite(
@@ -228,6 +244,9 @@ export async function acceptProjectInvite(
 
   const result = await redeemProjectInvite(token, user.id, user.email, phone)
   if (result.error) {
+    if (result.alreadyMember && result.projectId) {
+      await redirectToProjectAfterInvite(user.id, result.projectId)
+    }
     return {
       error: result.error,
       projectId: result.projectId,
@@ -235,10 +254,10 @@ export async function acceptProjectInvite(
   }
 
   if (result.projectId) {
-    revalidatePath(`/projects/${result.projectId}`)
+    await redirectToProjectAfterInvite(user.id, result.projectId)
   }
 
-  return { projectId: result.projectId }
+  return { error: 'Não foi possível aceitar o convite.' }
 }
 
 export async function revokeProjectInvite(

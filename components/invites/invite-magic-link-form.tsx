@@ -1,7 +1,6 @@
 'use client'
 
-import { useActionState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useActionState } from 'react'
 import { ArrowRight, Loader2, Mail, Phone } from 'lucide-react'
 import { acceptInviteWithLogin, type AcceptInviteState } from '@/app/actions/invites'
 import { buttonVariants } from '@/components/ui/button'
@@ -16,16 +15,9 @@ type InviteMagicLinkFormProps = {
 }
 
 export function InviteMagicLinkForm({ token, suggestedEmail }: InviteMagicLinkFormProps) {
-  const router = useRouter()
   const emailLocked = Boolean(suggestedEmail?.trim())
   const boundAccept = acceptInviteWithLogin.bind(null, token)
   const [state, formAction, pending] = useActionState(boundAccept, initialState)
-
-  useEffect(() => {
-    if (state.projectId && !state.error) {
-      router.push(`/projects/${state.projectId}?onboard=contact`)
-    }
-  }, [state.projectId, state.error, router])
 
   return (
     <form action={formAction} className="space-y-3 pt-2">

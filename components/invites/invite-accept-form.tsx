@@ -1,7 +1,6 @@
 'use client'
 
-import { useActionState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useActionState } from 'react'
 import { ArrowRight, Loader2, Phone } from 'lucide-react'
 import { acceptProjectInvite, type AcceptInviteState } from '@/app/actions/invites'
 import { buttonVariants } from '@/components/ui/button'
@@ -15,15 +14,8 @@ type InviteAcceptFormProps = {
 }
 
 export function InviteAcceptForm({ token }: InviteAcceptFormProps) {
-  const router = useRouter()
   const boundAccept = acceptProjectInvite.bind(null, token)
   const [state, formAction, pending] = useActionState(boundAccept, initialState)
-
-  useEffect(() => {
-    if (state.projectId && !state.error) {
-      router.push(`/projects/${state.projectId}?onboard=contact`)
-    }
-  }, [state.projectId, state.error, router])
 
   return (
     <form action={formAction} className="space-y-3 pt-2">

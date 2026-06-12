@@ -1,11 +1,12 @@
 import Link from 'next/link'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Users, Mail, ArrowRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getInvitePreview } from '@/lib/invites/queries'
 import { redeemProjectInvite } from '@/lib/invites/redeem'
+import { redirectToProjectAfterInvite } from '@/lib/invites/redirect-after-accept'
 import { getProjectAccess } from '@/lib/projects/queries'
 import { inviteRoleShortLabel } from '@/lib/invites/labels'
 import { InviteAcceptForm } from '@/components/invites/invite-accept-form'
@@ -49,42 +50,38 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
   let statusVariant: 'muted' | 'error' = 'muted'
   let projectLinkId: string | null = null
   let loggedInAsOwner = false
-  let alreadyMember = false
   let showAcceptForm = false
   let redeemError: string | null = inviteError ? decodeQueryError(inviteError) : null
 
   if (preview.isExpired) {
     statusMessage = 'Este convite expirou. Peça um novo link ao proprietário do projeto.'
-  } else if (preview.isRedeemed) {
-    statusMessage = 'Este convite já foi utilizado.'
-    projectLinkId = preview.projectId
   } else if (user) {
     const access = await getProjectAccess(preview.projectId, user.id)
 
-    if (access?.isOwner) {
+    if (access?.isOwner && preview.canRedeem) {
       loggedInAsOwner = true
       statusMessage =
         'Você está conectado como proprietário deste projeto. Convites são para outras pessoas — ' +
         'saia desta conta e entre com o e-mail do colaborador (ou use uma janela anônima).'
       statusVariant = 'error'
     } else if (access) {
-      alreadyMember = true
-      statusMessage = 'Você já participa deste projeto.'
-      projectLinkId = preview.projectId
+      await redirectToProjectAfterInvite(user.id, preview.projectId)
     } else if (preview.canRedeem) {
       const result = await redeemProjectInvite(preview.token, user.id, user.email)
       if (result.projectId && !result.error) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('phone')
-          .eq('id', user.id)
-          .maybeSingle()
-        const onboard = profile?.phone?.trim() ? '' : '?onboard=contact'
-        redirect(`/projects/${result.projectId}${onboard}`)
+        await redirectToProjectAfterInvite(user.id, result.projectId)
+      }
+      if (result.alreadyMember && result.projectId) {
+        await redirectToProjectAfterInvite(user.id, result.projectId)
       }
       redeemError = result.error ?? redeemError
       showAcceptForm = true
+    } else if (preview.isRedeemed) {
+      statusMessage = 'Este convite já foi utilizado.'
     }
+  } else if (preview.isRedeemed) {
+    statusMessage = 'Este convite já foi utilizado.'
+    projectLinkId = preview.projectId
   }
 
   const expiresLabel = format(new Date(preview.expiresAt), "d 'de' MMMM 'de' yyyy", {
@@ -188,7 +185,7 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
               <InviteMagicLinkForm token={preview.token} suggestedEmail={preview.email} />
             )}
 
-            {(projectLinkId || alreadyMember) && (
+            {projectLinkId && (
               <Link
                 href={`/projects/${projectLinkId ?? preview.projectId}`}
                 className={buttonVariants({ variant: 'outline', className: 'w-full' })}
