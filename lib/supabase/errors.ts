@@ -26,10 +26,30 @@ export function projectMutationError(
     return 'Tabela do banco não encontrada. Execute o schema SQL completo no Supabase (veja README).'
   }
 
+  // Missing column / PostgREST schema cache (e.g. multi_use not migrated yet)
+  const msg = error.message ?? ''
+  if (
+    error.code === '42703' ||
+    error.code === 'PGRST204' ||
+    /column .* does not exist/i.test(msg) ||
+    /could not find the ['"].*['"] column/i.test(msg)
+  ) {
+    if (/multi_use/i.test(msg)) {
+      return (
+        'O banco ainda não tem o suporte a links em grupo. ' +
+        'No Supabase → SQL Editor, execute o arquivo supabase/multi-use-invites.sql do repositório.'
+      )
+    }
+    return (
+      'Coluna ausente no banco (schema desatualizado). ' +
+      'Execute os scripts SQL em supabase/ no Supabase SQL Editor (veja README).'
+    )
+  }
+
   if (
     error.code === '22003' ||
-    error.message?.includes('integer out of range') ||
-    error.message?.includes('out of range for type integer')
+    msg.includes('integer out of range') ||
+    msg.includes('out of range for type integer')
   ) {
     return 'Erro interno ao ordenar a foto. Atualize o app e tente novamente.'
   }
