@@ -5,7 +5,6 @@ import { ptBR } from 'date-fns/locale'
 import { Users, Mail, ArrowRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getInvitePreview } from '@/lib/invites/queries'
-import { redeemProjectInvite } from '@/lib/invites/redeem'
 import { redirectToProjectAfterInvite } from '@/lib/invites/redirect-after-accept'
 import { getProjectAccess } from '@/lib/projects/queries'
 import { inviteRoleShortLabel } from '@/lib/invites/labels'
@@ -51,7 +50,7 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
   let projectLinkId: string | null = null
   let loggedInAsOwner = false
   let showAcceptForm = false
-  let redeemError: string | null = inviteError ? decodeQueryError(inviteError) : null
+  const redeemError: string | null = inviteError ? decodeQueryError(inviteError) : null
 
   if (preview.isExpired) {
     statusMessage = 'Este convite expirou. Peça um novo link ao proprietário do projeto.'
@@ -67,14 +66,7 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
     } else if (access) {
       await redirectToProjectAfterInvite(user.id, preview.projectId)
     } else if (preview.canRedeem) {
-      const result = await redeemProjectInvite(preview.token, user.id, user.email)
-      if (result.projectId && !result.error) {
-        await redirectToProjectAfterInvite(user.id, result.projectId)
-      }
-      if (result.alreadyMember && result.projectId) {
-        await redirectToProjectAfterInvite(user.id, result.projectId)
-      }
-      redeemError = result.error ?? redeemError
+      // Show form so the invitee can set their display name before joining
       showAcceptForm = true
     } else if (preview.isRedeemed) {
       statusMessage = 'Este convite já foi utilizado.'
@@ -120,9 +112,14 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
               Você foi convidado(a) para participar de
             </CardDescription>
             <p className="text-xl font-semibold text-foreground pt-1">{preview.projectTitle}</p>
-            {preview.inviteeName && (
+            {preview.inviteeName && !preview.multiUse && (
               <p className="text-sm text-muted-foreground pt-1">
                 Olá, <span className="font-medium text-foreground">{preview.inviteeName}</span>
+              </p>
+            )}
+            {preview.multiUse && preview.canRedeem && (
+              <p className="text-sm text-muted-foreground pt-2">
+                Este link pode ser usado por várias pessoas. Cada uma entra com o próprio e-mail.
               </p>
             )}
           </CardHeader>
@@ -132,6 +129,11 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
               <Badge variant="secondary" className="bg-muted text-muted-foreground border-0">
                 {inviteRoleShortLabel(preview.role)}
               </Badge>
+              {preview.multiUse && (
+                <Badge variant="secondary" className="bg-brand/10 text-brand border-0">
+                  Link em grupo
+                </Badge>
+              )}
               <span className="text-xs text-muted-foreground self-center">Válido até {expiresLabel}</span>
             </div>
 
@@ -179,10 +181,19 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
               </form>
             )}
 
-            {showAcceptForm && <InviteAcceptForm token={token} />}
+            {showAcceptForm && (
+              <InviteAcceptForm
+                token={token}
+                suggestedName={preview.multiUse ? null : preview.inviteeName}
+              />
+            )}
 
             {showMagicLinkForm && (
-              <InviteMagicLinkForm token={preview.token} suggestedEmail={preview.email} />
+              <InviteMagicLinkForm
+                token={preview.token}
+                suggestedEmail={preview.email}
+                suggestedName={preview.multiUse ? null : preview.inviteeName}
+              />
             )}
 
             {projectLinkId && (

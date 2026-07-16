@@ -76,8 +76,10 @@ export interface ProjectInvite {
   token: string // uuid
   invitee_name: string | null
   invitee_phone: string | null
-  email: string | null // optional prefill
+  email: string | null // optional prefill; when set, invite is single-use
   role: InviteRole
+  /** When true, many people can redeem the same link until it expires. */
+  multi_use: boolean
   expires_at: string
   redeemed_at: string | null
   redeemed_by: string | null

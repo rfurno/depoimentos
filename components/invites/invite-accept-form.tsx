@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
-import { ArrowRight, Loader2, Phone } from 'lucide-react'
+import { ArrowRight, Loader2, Phone, User } from 'lucide-react'
 import { acceptProjectInvite, type AcceptInviteState } from '@/app/actions/invites'
 import { buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,9 +11,10 @@ const initialState: AcceptInviteState = {}
 
 type InviteAcceptFormProps = {
   token: string
+  suggestedName?: string | null
 }
 
-export function InviteAcceptForm({ token }: InviteAcceptFormProps) {
+export function InviteAcceptForm({ token, suggestedName }: InviteAcceptFormProps) {
   const boundAccept = acceptProjectInvite.bind(null, token)
   const [state, formAction, pending] = useActionState(boundAccept, initialState)
 
@@ -22,6 +23,29 @@ export function InviteAcceptForm({ token }: InviteAcceptFormProps) {
       <p className="text-sm text-center text-muted-foreground">
         Ao aceitar, você passará a ver e participar deste projeto conforme o papel do convite.
       </p>
+
+      <div className="space-y-2">
+        <Label htmlFor="accept-display-name">
+          Seu nome <span className="font-normal text-muted-foreground">(opcional)</span>
+        </Label>
+        <div className="relative">
+          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            id="accept-display-name"
+            name="displayName"
+            type="text"
+            autoComplete="name"
+            placeholder="Como você quer aparecer"
+            className="pl-9 bg-card"
+            maxLength={120}
+            disabled={pending}
+            defaultValue={suggestedName?.trim() ?? ''}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Aparece nas fotos e comentários que você enviar.
+        </p>
+      </div>
 
       <div className="space-y-2">
         <Label htmlFor="accept-phone" className="text-sm text-muted-foreground">

@@ -28,19 +28,23 @@ function inviteLabel(row: {
   invitee_name: string | null
   email: string | null
   invitee_phone: string | null
+  multi_use?: boolean | null
 }): string {
   if (row.invitee_name?.trim()) return row.invitee_name.trim()
   if (row.email?.trim()) return row.email.trim()
   if (row.invitee_phone?.trim()) return row.invitee_phone.trim()
+  if (row.multi_use) return 'Link em grupo'
   return 'Convite aberto'
 }
 
 function inviteStatus(row: {
   expires_at: string
   redeemed_at: string | null
+  multi_use?: boolean | null
 }): PersonStatus {
-  if (row.redeemed_at) return 'used'
   if (new Date(row.expires_at).getTime() < Date.now()) return 'expired'
+  // Multi-use links stay pending until expiry (many people can still join)
+  if (!row.multi_use && row.redeemed_at) return 'used'
   return 'pending'
 }
 
@@ -80,7 +84,7 @@ export async function listProjectPeople(
     supabase
       .from('project_invites')
       .select(
-        'id, token, invitee_name, invitee_phone, email, role, expires_at, redeemed_at, created_at'
+        'id, token, invitee_name, invitee_phone, email, role, multi_use, expires_at, redeemed_at, created_at'
       )
       .eq('project_id', id)
       .order('created_at', { ascending: false }),

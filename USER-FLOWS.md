@@ -118,26 +118,31 @@ sequenceDiagram
 
 ## 3. Proprietário — convidar família
 
-**Objetivo:** trazer parentes ao projeto com um link seguro.
+**Objetivo:** trazer parentes ao projeto com um link seguro (incluindo um link só para várias pessoas).
 
 | Passo | Onde | O que acontece |
 |-------|------|----------------|
-| 1 | `/projects/[id]` | Seção **Convidar família** (só dono) |
-| 2 | Formulário | Escolhe papel, e-mail opcional (só informativo), validade (dias) |
+| 1 | `/projects/[id]` | Seção de pessoas / convites (dono ou admin) |
+| 2 | Formulário | Escolhe papel, rótulo opcional, e-mail opcional, validade (dias) |
 | 3 | **Gerar link de convite** | Server Action cria token UUID; link copiado para área de transferência |
-| 4 | WhatsApp / e-mail | Dono envia o link manualmente |
-| 5 | `/invite/[token]` | Convidado vê projeto, papel e validade |
+| 4 | WhatsApp / e-mail | Dono envia o **mesmo link** para várias pessoas (ou um e-mail específico) |
+| 5 | `/invite/[token]` | Convidado vê projeto, papel e validade; pode informar o **próprio nome** |
+
+**Tipos de link**
+
+- **Link em grupo** (sem e-mail) — `multi_use = true`; várias pessoas entram até expirar; cada uma com seu e-mail e nome
+- **Link individual** (com e-mail) — uso único; só aquele e-mail aceita; `redeemed_at` após o primeiro aceite
 
 **Estados do convite na lista do dono**
 
-- **Ativo** — pode ser usado até `expires_at`
-- **Usado** — `redeemed_at` preenchido
+- **Ativo / Pendente** — ainda pode ser usado até `expires_at` (links em grupo continuam ativos após vários aceites)
+- **Usado** — só links individuais com `redeemed_at` preenchido
 - **Expirado** — passou da data de validade
-- Dono pode **copiar** ou **revogar** links ativos
+- Dono pode **copiar** ou **revogar** links ativos; quem já entrou aparece como membro **Ativo** com o nome que escolheu
 
-**Requisito:** `SUPABASE_SERVICE_ROLE_KEY` no servidor para resgate do convite após login.
+**Requisito:** `SUPABASE_SERVICE_ROLE_KEY` no servidor para resgate do convite após login. SQL: `supabase/multi-use-invites.sql`.
 
-**Empty state:** “Nenhum convite ainda” até o primeiro link ser gerado.
+**Empty state:** “Nenhuma pessoa ainda” até o primeiro link ou membro.
 
 ---
 
@@ -175,12 +180,12 @@ flowchart TD
 | **Logado**, ainda não é membro | Uma tela com botão **Aceitar convite** (único clique extra) |
 | **Já é membro** | Link **Ir para o projeto** |
 | **Dono logado** no próprio convite | Aviso para sair e entrar com outro e-mail |
-| **Convite inválido** | 404, expirado ou já usado |
+| **Convite inválido** | 404, expirado ou (link individual) já usado |
 | **Falha no auto-aceite** | Retorno a `/invite/{token}?error=...` com mensagem |
 
-**Implementação:** resgate atômico via RPC `redeem_project_invite` (service role). Se o dono preencheu e-mail no convite, só esse endereço pode aceitar. Quem já está logado continua com aceite explícito via `InviteAcceptForm`.
+**Implementação:** resgate atômico via RPC `redeem_project_invite` (service role). Links sem e-mail são multi-uso; com e-mail, só esse endereço aceita e o link é consumido. Aceite coleta nome de exibição opcional (`profiles.full_name`) e telefone opcional. Quem já está logado usa aceite explícito via `InviteAcceptForm` (para poder informar o nome).
 
-Após aceite: linha em `project_collaborators` com o papel do convite; sessão persiste para visitas futuras.
+Após aceite: linha em `project_collaborators` com o papel do convite e `invite_id`; sessão persiste para visitas futuras.
 
 ---
 

@@ -169,6 +169,7 @@ export interface Database {
           invitee_phone: string | null
           email: string | null
           role: string
+          multi_use: boolean
           expires_at: string
           redeemed_at: string | null
           redeemed_by: string | null
@@ -183,6 +184,7 @@ export interface Database {
           invitee_phone?: string | null
           email?: string | null
           role: string
+          multi_use?: boolean
           expires_at: string
           redeemed_at?: string | null
           redeemed_by?: string | null
@@ -197,6 +199,7 @@ export interface Database {
           invitee_phone?: string | null
           email?: string | null
           role?: string
+          multi_use?: boolean
           expires_at?: string
           redeemed_at?: string | null
           redeemed_by?: string | null
@@ -214,6 +217,7 @@ export interface Database {
           p_user_id: string
           p_user_email: string
           p_phone?: string
+          p_display_name?: string
         }
         Returns: Json
       }

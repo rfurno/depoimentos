@@ -11,6 +11,7 @@ export type InvitePreview = {
   role: InviteRole
   inviteeName: string | null
   email: string | null
+  multiUse: boolean
   expiresAt: string
   isExpired: boolean
   isRedeemed: boolean
@@ -23,13 +24,20 @@ export type ProjectInviteRow = ProjectInvite & {
   isActive: boolean
 }
 
-function inviteStatus(invite: { expires_at: string; redeemed_at: string | null }) {
+function inviteStatus(invite: {
+  expires_at: string
+  redeemed_at: string | null
+  multi_use?: boolean | null
+}) {
   const isExpired = new Date(invite.expires_at).getTime() < Date.now()
-  const isRedeemed = Boolean(invite.redeemed_at)
+  const multiUse = Boolean(invite.multi_use)
+  // Multi-use links stay redeemable until expiry (not "used" after first person)
+  const isRedeemed = multiUse ? false : Boolean(invite.redeemed_at)
   return {
     isExpired,
     isRedeemed,
     isActive: !isExpired && !isRedeemed,
+    multiUse,
   }
 }
 
@@ -43,7 +51,7 @@ export async function getInvitePreview(token: string): Promise<InvitePreview | n
 
   const { data: invite, error } = await admin
     .from('project_invites')
-    .select('token, project_id, role, invitee_name, email, expires_at, redeemed_at')
+    .select('token, project_id, role, invitee_name, email, multi_use, expires_at, redeemed_at')
     .eq('token', tokenUuid)
     .maybeSingle()
 
@@ -66,6 +74,7 @@ export async function getInvitePreview(token: string): Promise<InvitePreview | n
     role: invite.role as InviteRole,
     inviteeName: invite.invitee_name,
     email: invite.email,
+    multiUse: status.multiUse,
     expiresAt: invite.expires_at,
     isExpired: status.isExpired,
     isRedeemed: status.isRedeemed,
@@ -95,7 +104,7 @@ export async function listProjectInvites(
   const { data: invites } = await supabase
     .from('project_invites')
     .select(
-      'id, project_id, token, invitee_name, invitee_phone, email, role, expires_at, redeemed_at, redeemed_by, created_by, created_at'
+      'id, project_id, token, invitee_name, invitee_phone, email, role, multi_use, expires_at, redeemed_at, redeemed_by, created_by, created_at'
     )
     .eq('project_id', id)
     .order('created_at', { ascending: false })
@@ -104,6 +113,7 @@ export async function listProjectInvites(
     const status = inviteStatus(row)
     return {
       ...row,
+      multi_use: Boolean(row.multi_use),
       role: row.role as InviteRole,
       inviteUrl: buildInviteUrl(row.token, origin),
       isExpired: status.isExpired,

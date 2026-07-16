@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
-import { ArrowRight, Loader2, Mail, Phone } from 'lucide-react'
+import { ArrowRight, Loader2, Mail, Phone, User } from 'lucide-react'
 import { acceptInviteWithLogin, type AcceptInviteState } from '@/app/actions/invites'
 import { buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,9 +12,14 @@ const initialState: AcceptInviteState = {}
 type InviteMagicLinkFormProps = {
   token: string
   suggestedEmail?: string | null
+  suggestedName?: string | null
 }
 
-export function InviteMagicLinkForm({ token, suggestedEmail }: InviteMagicLinkFormProps) {
+export function InviteMagicLinkForm({
+  token,
+  suggestedEmail,
+  suggestedName,
+}: InviteMagicLinkFormProps) {
   const emailLocked = Boolean(suggestedEmail?.trim())
   const boundAccept = acceptInviteWithLogin.bind(null, token)
   const [state, formAction, pending] = useActionState(boundAccept, initialState)
@@ -43,6 +48,29 @@ export function InviteMagicLinkForm({ token, suggestedEmail }: InviteMagicLinkFo
             required
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="invite-display-name">
+          Seu nome <span className="font-normal text-muted-foreground">(opcional)</span>
+        </Label>
+        <div className="relative">
+          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            id="invite-display-name"
+            name="displayName"
+            type="text"
+            autoComplete="name"
+            placeholder="Como você quer aparecer"
+            className="pl-9 bg-card"
+            maxLength={120}
+            disabled={pending}
+            defaultValue={suggestedName?.trim() ?? ''}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Aparece nas fotos e comentários que você enviar.
+        </p>
       </div>
 
       <div className="space-y-2">

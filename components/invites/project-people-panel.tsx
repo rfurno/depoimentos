@@ -169,7 +169,8 @@ export function ProjectPeoplePanel({
           Pessoas do projeto
         </CardTitle>
         <CardDescription className="text-muted-foreground">
-          Convide família, acompanhe quem aceitou e reenvie link de entrada para quem já está ativo.
+          Gere um link e envie para várias pessoas. Cada uma entra com o próprio e-mail e pode
+          informar o nome. Quem aceitar aparece abaixo como Ativo.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -219,15 +220,17 @@ export function ProjectPeoplePanel({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="invitee-name">Nome (opcional)</Label>
+              <Label htmlFor="invitee-name">Rótulo (opcional)</Label>
               <Input
                 id="invitee-name"
                 name="inviteeName"
-                placeholder="Tio João"
+                placeholder="Família do Rio"
                 className="bg-card border-border"
                 maxLength={120}
               />
-              <p className="text-xs text-muted-foreground">Só para você identificar na lista.</p>
+              <p className="text-xs text-muted-foreground">
+                Só para você identificar o link na lista (ex.: grupo do WhatsApp).
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -243,7 +246,8 @@ export function ProjectPeoplePanel({
                 <p className="text-sm text-destructive">{state.fieldErrors.email[0]}</p>
               )}
               <p className="text-xs text-muted-foreground">
-                Se preenchido, só este e-mail poderá aceitar o convite.
+                Deixe vazio para um link em grupo (várias pessoas). Se preencher, só esse e-mail
+                aceita — e o link fica de uso único.
               </p>
             </div>
 
@@ -394,7 +398,7 @@ export function ProjectPeoplePanel({
           <EmptyState
             icon={Mail}
             title="Nenhuma pessoa ainda"
-            description="Gere um convite acima. Quem aceitar aparecerá aqui como Ativo."
+            description="Gere um link em grupo acima e envie por WhatsApp. Cada pessoa que aceitar aparece aqui como Ativo, com o nome que escolheu."
             compact
             className="border-dashed bg-muted/30 shadow-none"
           />

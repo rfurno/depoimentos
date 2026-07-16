@@ -20,7 +20,7 @@ Plano completo em [project-instructions.md](./project-instructions.md). Todas as
 | 3 | Upload e galeria de fotos (signed URLs) | ✅ |
 | 4 | Comentários + modal de detalhes da foto | ✅ |
 | 5 | Apresentação de slides (teclado, swipe, overlay) | ✅ |
-| 6 | Convites por link seguro + auto-aceite após magic link | ✅ |
+| 6 | Convites por link seguro (em grupo ou individual) + nome no aceite | ✅ |
 | 7 | Admin (moderação, colaboradores, export ZIP) | ✅ |
 | 8 | Polimento, mobile-first, empty states, README | ✅ |
 
@@ -31,7 +31,7 @@ Plano completo em [project-instructions.md](./project-instructions.md). Todas as
 - **Galeria mobile-first** — busca, badges de comentários, fotos pendentes para o dono
 - **Comentários** — sob cada foto; moderação hierárquica no painel admin
 - **Apresentação** — tela cheia, deslize no celular, legenda/comentários em painel inferior
-- **Convites** — links UUID com validade; auto-aceite após magic link (um clique no e-mail); aceite manual se já logado
+- **Convites** — links UUID com validade; link em grupo (várias pessoas) ou individual (e-mail); cada um pode informar o nome no aceite
 - **Export ZIP** — imagens + `MEMORIES.md` + `memories.json` (limites de taxa e tamanho)
 - **Segurança** — RLS, bucket privado, signed URLs no servidor, políticas endurecidas
 
@@ -138,10 +138,11 @@ create table if not exists public.project_invites (
   id uuid primary key default uuid_generate_v4(),
   project_id uuid not null references public.projects(id) on delete cascade,
   token uuid not null unique default uuid_generate_v4(),
-  email text,                                    -- optional: pre-fill email
+  email text,                                    -- optional: binds invite to one email (single-use)
   role text not null check (role in ('contributor', 'viewer', 'admin')),
+  multi_use boolean not null default false,      -- true = shareable family link (see multi-use-invites.sql)
   expires_at timestamptz not null,
-  redeemed_at timestamptz,
+  redeemed_at timestamptz,                       -- set only for single-use after first redeem
   redeemed_by uuid references auth.users(id),
   created_by uuid not null references auth.users(id),
   created_at timestamptz not null default now()
@@ -371,6 +372,7 @@ on conflict (id) do nothing;
 7. `project-invites-revoke-anon-select.sql` — remove SELECT anônimo amplo em convites
 8. `redeem-project-invite.sql` — resgate atômico de convites + vínculo de e-mail quando preenchido
 9. `invite-people-phase1.sql` — nome/telefone no convite, telefone opcional no perfil, painel de pessoas, admins
+10. `multi-use-invites.sql` — links em grupo (várias pessoas no mesmo link) + nome de exibição no aceite
 
 **Storage (alternativa ao passo 3):** `storage-upload-policy.sql`, `storage-read-policy.sql`, `storage-delete-policy.sql`. Se política SELECT já existir (erro `42710`), execute `storage-reset-select-policy.sql` antes de recriar.
 
@@ -511,7 +513,7 @@ Vercel + Supabase é uma excelente combinação — edge functions, imagens ráp
 - Rotas protegidas por middleware + `getUser()` no servidor
 - RLS do Supabase como fonte da verdade; helpers `is_project_*` evitam recursão
 - Bucket `photos` privado; imagens via signed URLs geradas no servidor
-- Convites: auto-aceite no `/auth/callback?invite=…` após magic link; aceite manual (POST) se já logado; RPC `redeem_project_invite` (transação atômica); e-mail do convite obrigatório quando preenchido
+- Convites: link em grupo (`multi_use`) ou individual (e-mail); nome de exibição opcional no aceite; RPC `redeem_project_invite`; e-mail obrigatório quando preenchido no convite
 - Export: limite de fotos/tamanho + rate limit por usuário
 - Comentários em fotos não aprovadas bloqueados para não-donos
 - `project_invites`: SELECT anônimo amplo revogado; lookup por token no servidor

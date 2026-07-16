@@ -95,7 +95,8 @@ export function ProjectInvitesPanel({
           Convidar família
         </CardTitle>
         <CardDescription className="text-muted-foreground">
-          Gere um link seguro. Quem receber entra com link mágico e entra no projeto automaticamente.
+          Gere um link seguro para compartilhar com a família. Várias pessoas podem usar o mesmo
+          link; cada uma entra com o próprio e-mail e pode informar o nome.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -152,7 +153,7 @@ export function ProjectInvitesPanel({
                 <p className="text-sm text-destructive">{state.fieldErrors.email[0]}</p>
               )}
               <p className="text-xs text-muted-foreground">
-                Se preenchido, só quem entrar com este e-mail poderá aceitar o convite.
+                Deixe vazio para um link em grupo. Se preencher, só esse e-mail aceita (uso único).
               </p>
             </div>
 
@@ -249,8 +250,13 @@ function InviteListItem({
   past?: boolean
 }) {
   const expiresLabel = format(new Date(invite.expires_at), "d MMM yyyy", { locale: ptBR })
-  const isActive = !invite.redeemed_at && !invite.isExpired
-  const status = invite.redeemed_at ? 'Usado' : invite.isExpired ? 'Expirado' : 'Ativo'
+  const isActive = invite.isActive
+  const status =
+    !invite.multi_use && invite.redeemed_at
+      ? 'Usado'
+      : invite.isExpired
+        ? 'Expirado'
+        : 'Ativo'
 
   return (
     <li className="flex flex-col gap-2 rounded-xl border border-border bg-card px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
@@ -259,6 +265,11 @@ function InviteListItem({
           <Badge variant="secondary" className="bg-muted text-text-secondary border-0 text-xs">
             {inviteRoleShortLabel(invite.role)}
           </Badge>
+          {invite.multi_use && isActive && (
+            <Badge variant="secondary" className="bg-brand/10 text-brand border-0 text-xs">
+              Em grupo
+            </Badge>
+          )}
           {isActive ? (
             <Badge className="badge-active text-xs">Ativo</Badge>
           ) : (
@@ -266,9 +277,11 @@ function InviteListItem({
           )}
           <span className="text-xs text-muted-foreground">até {expiresLabel}</span>
         </div>
-        {invite.email && (
+        {invite.email ? (
           <p className="text-xs text-muted-foreground truncate">{invite.email}</p>
-        )}
+        ) : invite.multi_use ? (
+          <p className="text-xs text-muted-foreground">Várias pessoas podem usar este link</p>
+        ) : null}
       </div>
       {!past && onCopy && onRevoke && (
         <div className="flex gap-2 shrink-0">

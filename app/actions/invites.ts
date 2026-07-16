@@ -136,6 +136,9 @@ export async function createProjectInvite(
   const expiresAt = new Date()
   expiresAt.setDate(expiresAt.getDate() + parsed.data.expiresInDays)
 
+  // Email-bound invites are single-use; open links can be shared with many people
+  const multiUse = !parsed.data.email
+
   const { data, error } = await supabase
     .from('project_invites')
     .insert({
@@ -144,6 +147,7 @@ export async function createProjectInvite(
       invitee_name: parsed.data.inviteeName ?? null,
       email: parsed.data.email ?? null,
       invitee_phone: phoneHint,
+      multi_use: multiUse,
       expires_at: expiresAt.toISOString(),
       created_by: user.id,
     })
@@ -175,6 +179,7 @@ export async function acceptInviteWithLogin(
   if (!preview.canRedeem) {
     if (preview.isExpired) return { error: 'Este convite expirou.' }
     if (preview.isRedeemed) {
+      // Single-use only: if the signed-in user is already a member, send them in
       const supabase = await createClient()
       const {
         data: { user },
@@ -208,8 +213,15 @@ export async function acceptInviteWithLogin(
 
   const phone =
     formData?.get('phone') != null ? String(formData.get('phone')) : undefined
+  const displayName =
+    formData?.get('displayName') != null
+      ? String(formData.get('displayName'))
+      : undefined
 
-  const result = await redeemProjectInvite(token, login.userId, login.userEmail, phone)
+  const result = await redeemProjectInvite(token, login.userId, login.userEmail, {
+    phone,
+    displayName,
+  })
   if (result.error) {
     if (result.alreadyMember && result.projectId) {
       await redirectToProjectAfterInvite(login.userId, result.projectId)
@@ -242,8 +254,15 @@ export async function acceptProjectInvite(
 
   const phone =
     formData?.get('phone') != null ? String(formData.get('phone')) : undefined
+  const displayName =
+    formData?.get('displayName') != null
+      ? String(formData.get('displayName'))
+      : undefined
 
-  const result = await redeemProjectInvite(token, user.id, user.email, phone)
+  const result = await redeemProjectInvite(token, user.id, user.email, {
+    phone,
+    displayName,
+  })
   if (result.error) {
     if (result.alreadyMember && result.projectId) {
       await redirectToProjectAfterInvite(user.id, result.projectId)
